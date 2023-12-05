@@ -16,17 +16,30 @@
 
 // implementation for: man 2 access
 // Checks if a file exists.
+// This is the same as the access(2) system call. It returns -ENOENT if the path doesn't exist, -EACCESS if the requested permission isn't available, or 0 for success. Note that it can be called on files, directories, or any other object that appears in the filesystem. This call is not required but is highly recommended.
 int nufs_access(const char *path, int mask) {
-  int rv = 0;
+  int rv = -ENOENT;
 
-
-      // Only the root directory and our simulated file are accessible for now...
-  if (strcmp(path, "/") == 0 || strcmp(path, "/hello.txt") == 0) {
-    rv = 0;
-  } else { // ...others do not exist
-    rv = -ENOENT;
+  // We can always access the root directory...
+  if (strcmp(path, "/") == 0) {
+    rv = 0; // want to return success
   }
-  
+
+  // Get inum corresponding to supplied path
+  int inum = tree_lookup(path);
+
+  // if supplied path did not correspond to file, return -ENOENT
+  if (inum == -1) rv = -ENOENT;
+  else rv = 0; // inum != -1 means we found a valid file, want to return success
+
+  // ------ begin starter code  ------
+  // // Only the root directory and our simulated file are accessible for now...
+  // if (strcmp(path, "/") == 0 || strcmp(path, "/hello.txt") == 0) {
+  //   rv = 0;
+  // } else { // ...others do not exist
+  //   rv = -ENOENT;
+  // }
+  // ------ end starter code  ------
 
   printf("access(%s, %04o) -> %d\n", path, mask, rv);
   return rv;
