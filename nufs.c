@@ -126,6 +126,7 @@ int nufs_mkdir(const char *path, mode_t mode) {
   return rv;
 }
 
+//Remove (delete) the given file, symbolic link, hard link, or special node. Note that if you support hard links, unlink only deletes the data when the last hard link is removed. See unlink(2) for details.
 int nufs_unlink(const char *path) {
   int rv = -1;
   printf("unlink(%s) -> %d\n", path, rv);
@@ -146,8 +147,15 @@ int nufs_rmdir(const char *path) {
 
 // implements: man 2 rename
 // called to move a file within the same filesystem
+// Rename the file, directory, or other object "from" to the target "to". Note that the source and target don't have to be in the same directory, so it may be necessary to move the source to an entirely new directory. See rename(2) for full details.
 int nufs_rename(const char *from, const char *to) {
   int rv = -1;
+
+  // TODO add some sort of check? 
+  int inum = tree_lookup(from); // get inum from 'from' path
+  inode_t* inode = get_inode(inum); // get inode from inum
+  strcpy(inode->name, to); // change name to to
+
   printf("rename(%s => %s) -> %d\n", from, to, rv);
   return rv;
 }
