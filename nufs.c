@@ -10,6 +10,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include "storage.h"
+#include "blocks.h"
+#include "inode.h"
 
 #define FUSE_USE_VERSION 26
 #include <fuse.h>
@@ -184,8 +186,21 @@ int nufs_open(const char *path, struct fuse_file_info *fi) {
 
 // Actually read data
 // Copied from cs.hmc.edu... 'Read size bytes from the given file into the buffer buf, beginning offset bytes into the file. See read(2) for full details. Returns the number of bytes transferred, or 0 if offset was at or beyond the end of the file. Required for any sensible filesystem.'
-int nufs_read(const char *path, char *buf, size_t size, off_t offset,
-              struct fuse_file_info *fi) {
+int nufs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
+
+  inode_t *given_file = get_inode(tree_lookup(path)); // get inode from path
+
+  // offset / BLOCK_SIZE  -- tells you which of ptrs[] block to read from 
+  // offset % BLOCK_SIZE  -- tells you from where on ^that block to start reading from
+
+  // (offset + size) / BLOCK_SIZE  --- gives you the block you are ending on
+  // (offset + size) % BLOCK_SIZE  --- tells you where exactly on ^that block you're ending
+
+  // Just fill the buffer 'buf' with the contents of the file 
+    // decrement size until it is 0 -- add assert to make sure it's 0 at the end which means you have read all the bytes
+
+  // We are returning the number of bytes that transfer from the file to the buffer
+
   int rv = 6;
   strcpy(buf, "hello\n");
   printf("read(%s, %ld bytes, @+%ld) -> %d\n", path, size, offset, rv);
@@ -194,8 +209,12 @@ int nufs_read(const char *path, char *buf, size_t size, off_t offset,
 
 // Actually write data
 // Copied from cs.hmc.edu... 'Same as for read above, except that it can't return 0.'
-int nufs_write(const char *path, const char *buf, size_t size, off_t offset,
-               struct fuse_file_info *fi) {
+int nufs_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
+
+  // Read the contents of the file into buffer buf? 
+  // Need to ask more about this 
+  // Don't really understand if we are copying contents of buf into the file's blocks or what
+
   int rv = -1;
   printf("write(%s, %ld bytes, @+%ld) -> %d\n", path, size, offset, rv);
   return rv;
