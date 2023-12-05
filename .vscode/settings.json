@@ -1,8 +1,0 @@
-{
-  "files.associations": {
-    "bitmap.h": "c",
-    "blocks.h": "c",
-    "directory.h": "c",
-    "slist.h": "c"
-  }
-}

@@ -10,11 +10,12 @@
 #define INODE_COUNT 256
 
 typedef struct inode {
-  // int refs;  // reference count
-  int mode;  // permission & type
-  int size;  // bytes
-  int ptrs[2];
-  int iptr; 
+  // int refs;     // not using reference counts
+  int mode;        // permission & type
+  int size;        // bytes
+  int ptrs[2];     // 2 direct pointers?
+  int iptr;        // single indirect pointer
+  char name[15];   // big enough to be safe
 } inode_t;
 
 void print_inode(inode_t *node);

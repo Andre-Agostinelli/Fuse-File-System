@@ -34,22 +34,10 @@ int nufs_access(const char *path, int mask) {
 // Implementation for: man 2 stat
 // This is a crucial function.
 int nufs_getattr(const char *path, struct stat *st) {
-  int rv = 0;
+  int rv = storage_stat(path, st);
 
-  // Return some metadata for the root directory...
-  if (strcmp(path, "/") == 0) {
-    st->st_mode = 040755; // directory
-    st->st_size = 0;
-    st->st_uid = getuid();
-  }
-  // ...and the simulated file...
-  else if (strcmp(path, "/hello.txt") == 0) {
-    st->st_mode = 0100644; // regular file
-    st->st_size = 6;
-    st->st_uid = getuid();
-  } else { // ...other files do not exist on this filesystem
-    rv = -ENOENT;
-  }
+  if (rv == -1) return -ENOENT;
+
   printf("getattr(%s) -> (%d) {mode: %04o, size: %ld}\n", path, rv, st->st_mode,
          st->st_size);
   return rv;
@@ -62,14 +50,26 @@ int nufs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
   struct stat st;
   int rv;
 
+  // Get the root file's attributes in the st struct
   rv = nufs_getattr("/", &st);
   assert(rv == 0);
 
-  filler(buf, ".", &st, 0);
+  filler(buf, ".", &st, 0); // add "." 
 
-  rv = nufs_getattr("/hello.txt", &st);
-  assert(rv == 0);
-  filler(buf, "hello.txt", &st, 0);
+  // add all the names of our inodes
+  for (int ii=0; ii<INODE_COUNT; ii++) {
+    inode_t* cur_inode = get_inode(ii); // get cur inode
+    if (strcmp(cur_inode->name, "") != 0) { // if this inode's name is not empty
+      // printf("    (in readdir), Adding %s \n", cur_inode->name);
+      filler(buf, cur_inode->name, &st, 0); // add this name 
+      printf("%s\n", cur_inode->name); // print it? ask TA 
+    } 
+} 
+
+  // starter code
+  // rv = nufs_getattr("/hello.txt", &st);
+  // assert(rv == 0);
+  // filler(buf, "hello.txt", &st, 0);
 
   printf("readdir(%s) -> %d\n", path, rv);
   return 0;
@@ -84,6 +84,7 @@ int nufs_mknod(const char *path, mode_t mode, dev_t rdev) {
 
   int inum = alloc_inode();
 	inode_t* newnode = get_inode(inum);
+  printf("new inode created for new file with num: %d \n", inum);
   // int dirNum = directory_get_super(path);
 	// inode_t* node = get_inode(dirNum);
 
@@ -93,13 +94,11 @@ int nufs_mknod(const char *path, mode_t mode, dev_t rdev) {
     newnode->mode = mode;
     newnode->iptr = 0;
     newnode->size = 0;
+    strcpy(newnode->name, path);
 
     //rv = directory_put(get_inode(directory_get_super(path)), directory_get_name(path), inum);
-
+    rv = 0; // ?
     printf("mknod(%s, %04o) -> %d\n", path, mode, rv);
-
-
-
     return rv;
 }
 
