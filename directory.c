@@ -7,22 +7,25 @@
 // Initialize the root directory
 void directory_init() {
     printf("Initializing directory...\n");
-    void* inode_bitmap = get_inode_bitmap();
     
+    //marking block 1 as root
     void* block_bitmap = get_blocks_bitmap();
     bitmap_put(block_bitmap, 1, 1);
 
-    int root_inum = alloc_inode(); 
+    // int root_inum = alloc_inode(); // should be 0 -> could be hardcoded?
+    int root_inum = ROOT_INUM;
+    void *inode_bitmap = get_inode_bitmap();
+    bitmap_put(inode_bitmap, 0, 1); // mark first as used
 
-    inode_t* root_inode = get_inode(root_inum);
+    inode_t* root_inode = get_inode(root_inum); // will be 0
 
     // Initialize everything for the root inode...
     root_inode->mode = 040755; // set mode to directory
-    root_inode->size = 256; 
-    root_inode->ptrs[0] = alloc_block(); 
-    root_inode->ptrs[1] = alloc_block(); 
-    root_inode->iptr = 0; 
-    strcpy(root_inode->name, "/");
+    root_inode->size = 256; //256 files
+    root_inode->ptrs[0] = alloc_block(); // at this point block 0 has bitmap and block 1 has root so this will return 2nd block
+    root_inode->ptrs[1] = alloc_block(); //returns 3rd block // TODO : AA -> what are these storing exactly... 
+    root_inode->iptr = 0; //not allocated
+    strcpy(root_inode->name, ".");
 
     // directory_put(root_inode, ".", root_inum);
 }

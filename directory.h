@@ -20,6 +20,8 @@ typedef struct dirent {
 
 #define MAX_ENTR (4096 / sizeof(dirent_t))
 
+#define ROOT_INUM 0
+
 void directory_init();
 int directory_lookup(inode_t *di, const char *name);
 int directory_put(inode_t *di, const char *name, int inum);

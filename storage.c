@@ -1,10 +1,16 @@
 #include "storage.h"
 #include "blocks.h"
+#include "bitmap.h"
 
 // initialize the blocks and the root directory
 void storage_init(const char *path) {
-    blocks_init(path);
-    directory_init(); 
+    blocks_init(path); // sets block 0 to used for both bitmaps
+
+    void* block_bitmap = get_blocks_bitmap();
+    // if this system is new... then we need new root, else keep old
+    if (bitmap_get(block_bitmap, 1) == 0) {
+        directory_init(); 
+    }
 }
 
 // Get attributes based on path and fill given storage struct
