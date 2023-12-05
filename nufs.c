@@ -126,7 +126,7 @@ int nufs_mkdir(const char *path, mode_t mode) {
   return rv;
 }
 
-//Remove (delete) the given file, symbolic link, hard link, or special node. Note that if you support hard links, unlink only deletes the data when the last hard link is removed. See unlink(2) for details.
+// Copied from cs.hmc.edu...'Remove (delete) the given file, symbolic link, hard link, or special node. Note that if you support hard links, unlink only deletes the data when the last hard link is removed. See unlink(2) for details.'
 int nufs_unlink(const char *path) {
   int rv = -1;
   printf("unlink(%s) -> %d\n", path, rv);
@@ -183,6 +183,7 @@ int nufs_open(const char *path, struct fuse_file_info *fi) {
 }
 
 // Actually read data
+// Copied from cs.hmc.edu... 'Read size bytes from the given file into the buffer buf, beginning offset bytes into the file. See read(2) for full details. Returns the number of bytes transferred, or 0 if offset was at or beyond the end of the file. Required for any sensible filesystem.'
 int nufs_read(const char *path, char *buf, size_t size, off_t offset,
               struct fuse_file_info *fi) {
   int rv = 6;
@@ -192,6 +193,7 @@ int nufs_read(const char *path, char *buf, size_t size, off_t offset,
 }
 
 // Actually write data
+// Copied from cs.hmc.edu... 'Same as for read above, except that it can't return 0.'
 int nufs_write(const char *path, const char *buf, size_t size, off_t offset,
                struct fuse_file_info *fi) {
   int rv = -1;

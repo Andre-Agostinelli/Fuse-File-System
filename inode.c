@@ -38,7 +38,9 @@ int alloc_inode() {
     return -1; 
 } 
 
-void free_inode() {} 
+void free_inode() {
+    // going to need to implement for deleting files / nufs_unlink
+} 
 
 int grow_inode(inode_t *node, int size) {}
 
