@@ -2,6 +2,7 @@
 #include "inode.h"
 #include "blocks.h"
 #include "bitmap.h"
+#include <string.h>
 
 // Initialize the root directory
 void directory_init() {

@@ -60,11 +60,13 @@ int nufs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
   for (int ii=0; ii<INODE_COUNT; ii++) {
     inode_t* cur_inode = get_inode(ii); // get cur inode
     if (strcmp(cur_inode->name, "") != 0) { // if this inode's name is not empty
-      printf("    (in readdir), Adding %s \n", cur_inode->name);
+      // printf("    (in readdir), Adding %s \n", cur_inode->name);
       filler(buf, cur_inode->name, &st, 0); // add this name 
+      printf("%s\n", cur_inode->name); // print it? ask TA 
     } 
 } 
 
+  // starter code
   // rv = nufs_getattr("/hello.txt", &st);
   // assert(rv == 0);
   // filler(buf, "hello.txt", &st, 0);
