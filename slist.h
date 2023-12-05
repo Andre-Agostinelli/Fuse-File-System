@@ -23,14 +23,14 @@ typedef struct slist {
  *
  * @return List starting with the given string in front of the original list.
  */
-slist_t *slist_cons(const char *text, slist_t *rest);
+slist_t *s_cons(const char *text, slist_t *rest);
 
 /** 
  * Free the given string list.
  *
  * @param xs List of strings to free.
  */
-void slist_free(slist_t *xs);
+void s_free(slist_t *xs);
 
 /**
  * Split the given on the given delimiter into a list of strings.
@@ -42,6 +42,6 @@ void slist_free(slist_t *xs);
  *
  * @return a list containing all the substrings
  */
-slist_t *slist_explode(const char *text, char delim);
+slist_t *s_explode(const char *text, char delim);
 
 #endif
