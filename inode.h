@@ -5,14 +5,16 @@
 // based on cs3650 starter code
 #ifndef INODE_H
 #define INODE_H
-
 #include "blocks.h"
 
+#define INODE_COUNT 256
+
 typedef struct inode {
-  int refs;  // reference count
+  // int refs;  // reference count
   int mode;  // permission & type
   int size;  // bytes
-  int block; // single block pointer (if max file size <= 4K)
+  int ptrs[2];
+  int iptr; 
 } inode_t;
 
 void print_inode(inode_t *node);

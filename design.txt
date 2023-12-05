@@ -1,0 +1,14 @@
+- block 0 stores the block bitmap and inode bitmap
+
+- the block bitmap is size BLOCK_BITMAP_SIZE (32) and starts at the base of block 0 
+
+- the inode bitmap starts at block 0 + 32 ^^ (also size 32)
+
+- then we're gonna store 256 inodes
+
+
+- inodes start at block 1 
+- there are 256 inodes
+
+
+- 

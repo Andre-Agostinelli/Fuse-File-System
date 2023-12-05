@@ -18,6 +18,8 @@ typedef struct dirent {
   char _reserved[12];
 } dirent_t;
 
+#define MAX_ENTR (4096 / sizeof(dirent_t))
+
 void directory_init();
 int directory_lookup(inode_t *di, const char *name);
 int directory_put(inode_t *di, const char *name, int inum);

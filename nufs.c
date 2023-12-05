@@ -2,13 +2,14 @@
 
 #include <assert.h>
 #include <bsd/string.h>
-#include <dirent.h>
+// #include <dirent.h>
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include "storage.h"
 
 #define FUSE_USE_VERSION 26
 #include <fuse.h>
@@ -198,8 +199,8 @@ struct fuse_operations nufs_ops;
 
 int main(int argc, char *argv[]) {
   assert(argc > 2 && argc < 6);
-  printf("TODO: mount %s as data file\n", argv[--argc]);
-  // storage_init(argv[--argc]);
+  // printf("TODO: mount %s as data file\n", argv[--argc]);
+  storage_init(argv[--argc]);
   nufs_init_ops(&nufs_ops);
   return fuse_main(argc, argv, &nufs_ops, NULL);
 }
