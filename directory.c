@@ -30,3 +30,14 @@ int directory_put(inode_t *di, const char *name, int inum) {
     }
     return -1; 
 }
+
+/*
+ * Returns the data of the given path's furthest node...
+ */
+char* directory_get_name(const char* path) {
+    slist_t* list = s_explode(path, '/');
+    while(list->next) {
+        list = list->next;
+    }
+    return list->data;
+}

@@ -81,12 +81,31 @@ int nufs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 // function.
 int nufs_mknod(const char *path, mode_t mode, dev_t rdev) {
   int rv = -1;
-  printf("mknod(%s, %04o) -> %d\n", path, mode, rv);
-  return rv;
+
+  int inum = alloc_inode();
+	inode_t* newnode = get_inode(inum);
+  // int dirNum = directory_get_super(path);
+	// inode_t* node = get_inode(dirNum);
+
+    newnode->ptrs[0] = alloc_block();
+    newnode->ptrs[1] = alloc_block();
+    //newnode->refs = 1;
+    newnode->mode = mode;
+    newnode->iptr = 0;
+    newnode->size = 0;
+
+    //rv = directory_put(get_inode(directory_get_super(path)), directory_get_name(path), inum);
+
+    printf("mknod(%s, %04o) -> %d\n", path, mode, rv);
+
+
+
+    return rv;
 }
 
 // most of the following callbacks implement
 // another system call; see section 2 of the manual
+// leave as is...
 int nufs_mkdir(const char *path, mode_t mode) {
   int rv = nufs_mknod(path, mode | 040000, 0);
   printf("mkdir(%s) -> %d\n", path, rv);
