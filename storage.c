@@ -36,3 +36,46 @@ int storage_stat(const char *path, struct stat *st) {
 int storage_read(const char *path, char *buf, size_t size, off_t offset) {
     
 }
+
+int storage_write(const char *path, const char *buf, size_t size, off_t offset) {
+    int truncate = storage_truncate(path, size + offset);
+
+    // truncate will check if inode is in tree & accordingly shrink/grow if needed
+    if (truncate < 0) {
+        return truncate;
+    }
+    
+    int inum = tree_lookup(path); //should def be in path alr at this point
+    inode_t *node = get_inode(inum);
+    printf("+ storage_read(%s); inode %d\n", path, inum);
+    print_inode(node);
+
+    int written_so_far = 0;
+
+    //get block # corresponding with inode - inode_get_bnum?
+    //block_get_block
+    //need cursor to write - writeptr?
+    // need to always know: 1. bytes left on page 2. left to write
+    // need to be able to go to diff page if size is large -> supports more than 4k.
+
+
+
+
+}
+
+int storage_truncate(const char *path, off_t size) {
+    int inode_num = tree_lookup(path);
+    if (inode_num < 0) {
+        return inode_num;
+    }
+
+    inode_t* inode = get_inode(inode_num);
+    if (size >= inode->size) {
+        int rv = grow_inode(inode, size);
+        return rv;
+    } else {
+        int rv = shrink_inode(inode, size);
+        return rv;
+    }
+}
+
