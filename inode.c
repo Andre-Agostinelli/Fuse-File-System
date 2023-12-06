@@ -23,7 +23,7 @@ int alloc_inode() {
     for (int ii = 0; ii<INODE_COUNT; ++ii) {
         if (!bitmap_get(inode_bitmap, ii)) { // if free 
             bitmap_put(inode_bitmap, ii, 1); // mark as used
-            printf("Allocated new inode at inode_bitmap[%d]\n" + ii);
+            printf("Allocated new inode at inode_bitmap[%d]\n", ii);
             return ii; // return index
         }
     } 
@@ -37,7 +37,18 @@ void free_inode() {
 // Grow the inode by the given size
 int grow_inode(inode_t *node, int size) {
     // needed for storage truncating when reading/writing
-    node->size += size;
+    int current_size = size;
+    if (node->ptrs[0] == -1 && current_size > 0) {
+        node->ptrs[0] = alloc_block();
+        current_size -= BLOCK_SIZE;
+        node->size = node->size + BLOCK_SIZE;
+    } else if (node->ptrs[1] == -1 && current_size > 0) {
+        node->ptrs[1] = alloc_block();
+        current_size -= BLOCK_SIZE;
+        node->size = node->size + BLOCK_SIZE;
+    } else if (current_size > 0) {
+        //TODO: INDIRECTION AA
+    }
     return node->size;
 }
 

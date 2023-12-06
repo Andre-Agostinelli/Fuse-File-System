@@ -1,6 +1,6 @@
 #include "storage.h"
 #include "blocks.h"
-#include "bitmap.h"
+#include "bitmap.h" 
 
 // initialize the blocks and the root directory
 void storage_init(const char *path) {
@@ -49,9 +49,9 @@ int storage_read(const char *path, char *buf, size_t size, off_t offset) {
 
     // return 0 if the offset is at or beyond the end of the file
     if (size + offset > node->size) {
-        printf("size: %d\n", size);
-        printf("offset: %d\n", offset);
-        printf("Size+offset: %d is bigger than inode size:%d\n", size+offset, node->size);
+        printf("size: %lu\n", size);
+        printf("offset: %lu\n", offset);
+        printf("Size+offset: %lu is bigger than inode size:%d\n", size+offset, node->size);
         return 0;
     }
     else {
@@ -80,7 +80,9 @@ int storage_write(const char *path, const char *buf, size_t size, off_t offset) 
     // ** ONLY GROW, NOT SHRINK ON WRITE **
 
     if (size + offset > node->size) {
+        printf("Size+offset: %lu is bigger than inode size:%d\n", size+offset, node->size);
         grow_inode(node, size + offset); // make the inode big enough to write this thing
+        printf("Size+offset: %lu is bigger than inode size:%d\n", size+offset, node->size);
     }
 
     int written_so_far = 0;
@@ -90,13 +92,13 @@ int storage_write(const char *path, const char *buf, size_t size, off_t offset) 
     int block_offset = offset % BLOCK_SIZE; //-- tells you from where on ^that block to start writing
     printf("  Offset: %d\n", block_offset);
     void* data = blocks_get_block(node->ptrs[block_start]) + offset; // start of our write
-    printf("  Data: %d\n", data);
+    printf("  Data: %p\n", data);
     int bytes_remaining = BLOCK_SIZE - block_offset; // bytes remaining in the starting block ("block_start")
 
 
     if (size < bytes_remaining) { // if we have enough room in the starting block
         memcpy(data, buf, size); // copy buf into data (size is how much) -> we know size fits into this block
-        printf("  Writing data: %d\n", data);
+        printf("  Writing data: %p\n", data);
     } 
     // else {
     //     // write amount bytes_remaining,

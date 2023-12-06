@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "slist.h"
 #include "directory.h"

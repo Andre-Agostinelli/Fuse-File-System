@@ -22,8 +22,8 @@ void directory_init() {
     // Initialize everything for the root inode...
     root_inode->mode = 040755; // set mode to directory
     root_inode->size = 256; // 256 files
-    root_inode->ptrs[0] = alloc_block(); // at this point block 0 has bitmap and block 1 has root so this will return 2nd block
-    root_inode->ptrs[1] = alloc_block(); //returns 3rd block // TODO : AA -> what are these storing exactly... 
+    root_inode->ptrs[0] = -1; // instead of allocating wasted space
+    root_inode->ptrs[1] = -1; // instead of allocating wasted space
     root_inode->iptr = 0; //not allocated
     strcpy(root_inode->name, "/");
 
@@ -50,9 +50,7 @@ char* directory_get_name(const char* path) {
     return list->data;
 }
 
-int directory_lookup(inode_t *di, const char *name) {
-
-}
+int directory_lookup(inode_t *di, const char *name) { }
 
 // Given the path for a file, returns its inum int
 int tree_lookup(const char *path) {

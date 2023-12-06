@@ -104,8 +104,8 @@ int nufs_mknod(const char *path, mode_t mode, dev_t rdev) {
   // int dirNum = directory_get_super(path);
 	// inode_t* node = get_inode(dirNum);
 
-    newnode->ptrs[0] = alloc_block();
-    newnode->ptrs[1] = alloc_block();
+    newnode->ptrs[0] = -1;
+    newnode->ptrs[1] = -1;
     //newnode->refs = 1;
     newnode->mode = mode;
     newnode->iptr = 0;
