@@ -15,7 +15,7 @@ typedef struct inode {
   int size;        // bytes
   int ptrs[2];     // 2 direct pointers?
   int iptr;        // single indirect pointer
-  char name[15];   // big enough to be safe
+  char name[16];   // big enough to be safe
 } inode_t;
 
 void print_inode(inode_t *node);
