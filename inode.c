@@ -1,14 +1,6 @@
 #include "inode.h"
 #include "bitmap.h"
 
-// typedef struct inode {
-//   // int refs;  // reference count
-//   int mode;  // permission & type
-//   int size;  // bytes
-//   int ptrs[2];
-//   int iptr; 
-// } inode_t;
-
 // Print information about the given inode
 void print_inode(inode_t *node) {
     if (node) { 
@@ -42,8 +34,18 @@ void free_inode() {
     // going to need to implement for deleting files / nufs_unlink
 } 
 
-int grow_inode(inode_t *node, int size) {}
+int grow_inode(inode_t *node, int size) {
+    // needed for storage truncating when reading/writing
+}
 
-int shrink_inode(inode_t *node, int size) {}
+int shrink_inode(inode_t *node, int size) {
+    // needed for storage truncating when reading/writing
+}
 
-int inode_get_bnum(inode_t *node, int file_bnum) {}
+// get the block number associated with the inode
+int inode_get_bnum(inode_t *node, int file_bnum) {
+    int block_index = file_bnum / BLOCK_SIZE;
+
+    // if file_bnum is greater than 2, it is larger than 2 blocks -> need indirection pointer     
+    return block_index < 2 ? node->ptrs[file_bnum] : ((int*)pages_get_page(node->iptr))[block_index - 2];
+}

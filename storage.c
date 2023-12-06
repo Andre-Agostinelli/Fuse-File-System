@@ -52,14 +52,17 @@ int storage_write(const char *path, const char *buf, size_t size, off_t offset) 
 
     int written_so_far = 0;
 
+    char* data = blocks_get_block(inode_get_bnum(node, truncate)); //TODO AA
+    // copy buffer into -> node data
+    // return error if write to too little space -> 
+    // for read u copy node stuff into buffer -> and can only read size left...
+
+
     //get block # corresponding with inode - inode_get_bnum?
     //block_get_block
     //need cursor to write - writeptr?
     // need to always know: 1. bytes left on page 2. left to write
     // need to be able to go to diff page if size is large -> supports more than 4k.
-
-
-
 
 }
 
