@@ -36,6 +36,7 @@ void free_inode() {
 
 int grow_inode(inode_t *node, int size) {
     // needed for storage truncating when reading/writing
+    
 }
 
 int shrink_inode(inode_t *node, int size) {

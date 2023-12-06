@@ -215,7 +215,7 @@ int nufs_write(const char *path, const char *buf, size_t size, off_t offset, str
   // Need to ask more about this 
   // Don't really understand if we are copying contents of buf into the file's blocks or what
 
-  int rv = storage_write(path, buf, size, offset); // writing defined here... AA
+  int rv = storage_write(path, buf, size, offset); 
   printf("write(%s, %ld bytes, @+%ld) -> %d\n", path, size, offset, rv);
   return rv;
 }

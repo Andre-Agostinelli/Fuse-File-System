@@ -38,21 +38,35 @@ int storage_read(const char *path, char *buf, size_t size, off_t offset) {
 }
 
 int storage_write(const char *path, const char *buf, size_t size, off_t offset) {
-    int truncate = storage_truncate(path, size + offset);
+    // int truncate = storage_truncate(path, size + offset);
 
-    // truncate will check if inode is in tree & accordingly shrink/grow if needed
-    if (truncate < 0) {
-        return truncate;
-    }
+    // // truncate will check if inode is in tree & accordingly shrink/grow if needed
+    // if (truncate < 0) {
+    //     return truncate;
+    // }
     
-    int inum = tree_lookup(path); //should def be in path alr at this point
+    int inum = tree_lookup(path); 
+    if (inum < 0) {
+        return inum; //inum was not found in path -> can't wirte
+    }
+
     inode_t *node = get_inode(inum);
-    printf("+ storage_read(%s); inode %d\n", path, inum);
     print_inode(node);
 
     int written_so_far = 0;
 
-    char* data = blocks_get_block(inode_get_bnum(node, truncate)); //TODO AA
+    // char* data = blocks_get_block(inode_get_bnum(node, 0)); 
+
+    int block_start = offset / BLOCK_SIZE;  //-- tells you which of ptrs[] block to read from 
+    int block_offset = offset % BLOCK_SIZE; //-- tells you from where on ^that block to start writing
+    void* data = blocks_get_block(node->ptrs[block_start]) + block_offset; //start of our write
+
+    while (written_so_far < size) {
+        // need to check how much is left on my current block...
+        
+    }
+
+
     // copy buffer into -> node data
     // return error if write to too little space -> 
     // for read u copy node stuff into buffer -> and can only read size left...
@@ -66,6 +80,7 @@ int storage_write(const char *path, const char *buf, size_t size, off_t offset) 
 
 }
 
+// 
 int storage_truncate(const char *path, off_t size) {
     int inode_num = tree_lookup(path);
     if (inode_num < 0) {
