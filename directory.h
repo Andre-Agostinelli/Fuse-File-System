@@ -12,6 +12,7 @@
 #include "inode.h"
 #include "slist.h"
 
+// We don't use this
 typedef struct dirent {
   char name[DIR_NAME_LENGTH];
   int inum;

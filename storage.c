@@ -36,6 +36,17 @@ int storage_stat(const char *path, struct stat *st) {
 // Copied from cs.hmc.edu... 'Read size bytes from the given file into the buffer buf, beginning offset bytes into the file. See read(2) for full details. Returns the number of bytes transferred, or 0 if offset was at or beyond the end of the file. Required for any sensible filesystem.'
 int storage_read(const char *path, char *buf, size_t size, off_t offset) {
 
+    // offset / BLOCK_SIZE  -- tells you which of ptrs[] block to read from 
+    // offset % BLOCK_SIZE  -- tells you from where on ^that block to start reading from
+
+    // (offset + size) / BLOCK_SIZE  --- gives you the block you are ending on
+    // (offset + size) % BLOCK_SIZE  --- tells you where exactly on ^that block you're ending
+
+    // Just fill the buffer 'buf' with the contents of the file 
+    // decrement size until it is 0 -- add assert to make sure it's 0 at the end which means you have read all the bytes
+
+    // We are returning the number of bytes that transfer from the file to the buffer
+
     // get working with block 0 for now
 
     // get the inode
@@ -67,8 +78,6 @@ int storage_read(const char *path, char *buf, size_t size, off_t offset) {
 }
 
 int storage_write(const char *path, const char *buf, size_t size, off_t offset) {
-    // int truncate = storage_truncate(path, size + offset);
-
     // Get the inode...
     int inum = tree_lookup(path);  // get inum from path
     if (inum < 0) {
@@ -133,4 +142,3 @@ int storage_truncate(const char *path, off_t size) {
         return rv;
     }
 }
-

@@ -1,11 +1,11 @@
 #include "inode.h"
 #include "bitmap.h"
 #include <errno.h>
+#include <string.h>
 
 // Print information about the given inode
 void print_inode(inode_t *node) {
     if (node) { 
-        // printf("node mode: %04o, size: %d, ptrs[0]: %d, ptrs[1]: %d, iptr: %d}\n", node->mode, node->size,  node->ptrs[0], node->ptrs[1], node->iptr);
         printf("node mode: %04o, size: %d, block:%d, iptr: %d}\n", node->mode, node->size,  node->block, node->iptr);
     }
     else {
@@ -32,8 +32,20 @@ int alloc_inode() {
     return -1; 
 } 
 
-void free_inode() {
-    // going to need to implement for deleting files / nufs_unlink
+// Free the inode given by inum
+void free_inode(int inum) {
+    inode_t *node = get_inode(inum); // get this inode
+
+    blocks_free(node->block); // free its block
+
+    // reset all its fields...
+    node->mode = 0;
+    node->size = 0;
+    node->block = -1;
+    node->iptr = -1;
+    strcpy(node->name, "");
+
+    bitmap_put(get_inode_bitmap(), inum, 0); // set this inode to free
 } 
 
 // Grow the inode by the given size
@@ -48,10 +60,5 @@ int shrink_inode(inode_t *node, int size) {
 
 // get the memory location associated with the block index bnum for this inode
 int inode_get_bnum(inode_t *node, int file_bnum) {
-    // int block_index = file_bnum / BLOCK_SIZE;
-
-    // // if file_bnum is greater than 2, it is larger than 2 blocks -> need indirection pointer     
-    // return block_index < 2 ? node->ptrs[file_bnum] : ((int*)blocks_get_block(node->iptr))[block_index - 2];
-
-    return node->block;
+    return node->block; // simply return the memory address of this inode's block
 }

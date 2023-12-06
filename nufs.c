@@ -34,15 +34,6 @@ int nufs_access(const char *path, int mask) {
   if (inum == -1) rv = -ENOENT;
   else rv = 0; // inum != -1 means we found a valid file, want to return success
 
-  // ------ begin starter code  ------
-  // // Only the root directory and our simulated file are accessible for now...
-  // if (strcmp(path, "/") == 0 || strcmp(path, "/hello.txt") == 0) {
-  //   rv = 0;
-  // } else { // ...others do not exist
-  //   rv = -ENOENT;
-  // }
-  // ------ end starter code  ------
-
   printf("access(%s, %04o) -> %d\n", path, mask, rv);
   return rv;
 }
@@ -81,13 +72,9 @@ int nufs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
       filler(buf, cur_inode->name, &st, 0); // add this name 
       printf("%s\n", cur_inode->name); // print it? ask TA 
     } 
-} 
+  }  
 
-  // starter code
-  // rv = nufs_getattr("/hello.txt", &st);
-  // assert(rv == 0);
-  // filler(buf, "hello.txt", &st, 0);
-
+  assert(rv == 0);
   printf("readdir(%s) -> %d\n", path, rv);
   return 0;
 }
@@ -97,26 +84,21 @@ int nufs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 // Note, for this assignment, you can alternatively implement the create
 // function.
 int nufs_mknod(const char *path, mode_t mode, dev_t rdev) {
-  int rv = -1;
+  int rv = 0;
 
   int inum = alloc_inode();
+  if (inum == -1) {
+    return -ENOENT;
+  }
 	inode_t* newnode = get_inode(inum);
-  // int dirNum = directory_get_super(path);
-	// inode_t* node = get_inode(dirNum);
+  newnode->block = alloc_block();
+  newnode->mode = mode;
+  newnode->iptr = 0;
+  newnode->size = 0;
+  strcpy(newnode->name, path);
 
-    // newnode->ptrs[0] = -1;
-    // newnode->ptrs[1] = -1;
-    newnode->block = alloc_block();
-    //newnode->refs = 1;
-    newnode->mode = mode;
-    newnode->iptr = 0;
-    newnode->size = 0;
-    strcpy(newnode->name, path);
-
-    //rv = directory_put(get_inode(directory_get_super(path)), directory_get_name(path), inum);
-    rv = 0; // ?
-    printf("mknod '%s' (%s, %04o) -> %d\n", newnode->name, path, mode, rv);
-    return rv;
+  printf("mknod '%s' (%s, %04o) -> %d\n", newnode->name, path, mode, rv);
+  return rv;
 }
 
 // most of the following callbacks implement
@@ -130,7 +112,9 @@ int nufs_mkdir(const char *path, mode_t mode) {
 
 // Copied from cs.hmc.edu...'Remove (delete) the given file, symbolic link, hard link, or special node. Note that if you support hard links, unlink only deletes the data when the last hard link is removed. See unlink(2) for details.'
 int nufs_unlink(const char *path) {
-  int rv = -1;
+  int inum = tree_lookup(path);
+  free_inode(inum);
+  int rv = 0;
   printf("unlink(%s) -> %d\n", path, rv);
   return rv;
 }
@@ -187,36 +171,17 @@ int nufs_open(const char *path, struct fuse_file_info *fi) {
 // Actually read data
 // Copied from cs.hmc.edu... 'Read size bytes from the given file into the buffer buf, beginning offset bytes into the file. See read(2) for full details. Returns the number of bytes transferred, or 0 if offset was at or beyond the end of the file. Required for any sensible filesystem.'
 int nufs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
-
-  // offset / BLOCK_SIZE  -- tells you which of ptrs[] block to read from 
-  // offset % BLOCK_SIZE  -- tells you from where on ^that block to start reading from
-
-  // (offset + size) / BLOCK_SIZE  --- gives you the block you are ending on
-  // (offset + size) % BLOCK_SIZE  --- tells you where exactly on ^that block you're ending
-
-  // Just fill the buffer 'buf' with the contents of the file 
-    // decrement size until it is 0 -- add assert to make sure it's 0 at the end which means you have read all the bytes
-
-  // We are returning the number of bytes that transfer from the file to the buffer
   size = get_inode(tree_lookup(path))->size;
   int rv = storage_read(path, buf, size, offset);
-  // int rv = 6;
-  // strcpy(buf, "hello\n");
   printf("read(%s, %ld bytes, @+%ld) -> %d\n", path, size, offset, rv);
-  printf(buf);
+  printf("%s", buf); // print the contets of the file
   return rv;
 }
 
 // Actually write data
 // Copied from cs.hmc.edu... 'Same as for read above, except that it can't return 0.'
 int nufs_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
-
-  // Read the contents of the file into buffer buf? 
-  // Need to ask more about this 
-  // Don't really understand if we are copying contents of buf into the file's blocks or what
-
   int rv = storage_write(path, buf, size, offset); 
-  // int rv = size;
   printf("write(%s, %ld bytes, @+%ld) -> %d\n", path, size, offset, rv);
   return rv;
 }

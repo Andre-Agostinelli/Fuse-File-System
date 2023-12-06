@@ -6,9 +6,8 @@
 
 - then we're gonna store 256 inodes
 
-
 - inodes start at block 1 
 - there are 256 inodes
 
-
-- 
+- each inode has 1 direct pointer block 
+- we added a name field to the inode struct, and do not use dirents 

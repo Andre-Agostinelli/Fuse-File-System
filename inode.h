@@ -10,11 +10,10 @@
 #define INODE_COUNT 256
 
 typedef struct inode {
-  // int refs;     // not using reference counts
+  // int refs;     // nah
   int mode;        // permission & type
   int size;        // bytes written
-  // int ptrs[2];     // 2 direct pointers?
-  int block;     // 2 direct pointers?
+  int block;       // 2 direct pointers?
   int iptr;        // single indirect pointer
   char name[16];   // big enough to be safe
 } inode_t;
@@ -22,7 +21,7 @@ typedef struct inode {
 void print_inode(inode_t *node);
 inode_t *get_inode(int inum);
 int alloc_inode();
-void free_inode();
+void free_inode(int inum);
 int grow_inode(inode_t *node, int size);
 int shrink_inode(inode_t *node, int size);
 int inode_get_bnum(inode_t *node, int file_bnum);
