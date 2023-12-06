@@ -63,8 +63,9 @@ int storage_write(const char *path, const char *buf, size_t size, off_t offset) 
 
     while (written_so_far < size) {
         // need to check how much is left on my current block...
-        
+
     }
+
 
 
     // copy buffer into -> node data
