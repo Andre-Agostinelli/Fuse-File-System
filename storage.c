@@ -33,55 +33,83 @@ int storage_stat(const char *path, struct stat *st) {
 }
 
 // Read all the files we have and fill the buffer
+// Copied from cs.hmc.edu... 'Read size bytes from the given file into the buffer buf, beginning offset bytes into the file. See read(2) for full details. Returns the number of bytes transferred, or 0 if offset was at or beyond the end of the file. Required for any sensible filesystem.'
 int storage_read(const char *path, char *buf, size_t size, off_t offset) {
-    
+
+    // get working with block 0 for now
+
+    // get the inode
+    int inum = tree_lookup(path);  // get inum from path
+    if (inum < 0) {
+        return inum; //inum was not found in path -> can't wirte
+    }
+    inode_t *node = get_inode(inum);
+    print_inode(node);
+
+    // return 0 if the offset is at or beyond the end of the file
+    if (size + offset > node->size) {
+        printf("size: %d\n", size);
+        printf("offset: %d\n", offset);
+        printf("Size+offset: %d is bigger than inode size:%d\n", size+offset, node->size);
+        return 0;
+    }
+    else {
+        int block_start = offset / BLOCK_SIZE;  // get the starting file's starting block
+        int block_offset = offset % BLOCK_SIZE; // where to start in ^ that block
+        void* data = blocks_get_block(node->ptrs[block_start]) + block_offset; // pointer to the start point to read from
+        // copied from below...
+        // int bytes_remaining = BLOCK_SIZE - block_offset; // bytes remaining in the starting block ("block_start")
+        
+        memcpy(buf, data, size); // read the data from data->buf of amt size
+        return size; 
+    }
 }
 
 int storage_write(const char *path, const char *buf, size_t size, off_t offset) {
     // int truncate = storage_truncate(path, size + offset);
 
-    // // truncate will check if inode is in tree & accordingly shrink/grow if needed
-    // if (truncate < 0) {
-    //     return truncate;
-    // }
-    
-    int inum = tree_lookup(path); 
+    int inum = tree_lookup(path);  // get inum from path
     if (inum < 0) {
         return inum; //inum was not found in path -> can't wirte
     }
-
     inode_t *node = get_inode(inum);
     print_inode(node);
 
-    int written_so_far = 0;
+    // call inode grow if offset + size > inodes current size, grow the inode by the difference between those 2
+    // ** ONLY GROW, NOT SHRINK ON WRITE **
 
-    // char* data = blocks_get_block(inode_get_bnum(node, 0)); 
+    if (size + offset > node->size) {
+        // grow the inode
+        node->size = size+offset; // TODO: change init of inodes, to only grow when write not on init
+    }
+
+    int written_so_far = 0;
 
     int block_start = offset / BLOCK_SIZE;  //-- tells you which of ptrs[] block to read from 
     int block_offset = offset % BLOCK_SIZE; //-- tells you from where on ^that block to start writing
-    void* data = blocks_get_block(node->ptrs[block_start]) + block_offset; //start of our write
-
-    while (written_so_far < size) {
-        // need to check how much is left on my current block...
-
-    }
+    void* data = blocks_get_block(node->ptrs[block_start]) + block_offset; // start of our write
+    int bytes_remaining = BLOCK_SIZE - block_offset; // bytes remaining in the starting block ("block_start")
 
 
+    if (size < bytes_remaining) { // if we have enough room in the starting block
+        memcpy(data, buf, size); // copy buf into data (size is how much) -> we know size fits into this block
+    } 
+    // else {
+    //     // write amount bytes_remaining,
+    //     // start at beginning of block[1]
+    //     // keep writing until written_so_far == size OR 
+    //     while (written_so_far < size) {
+    //         void* data = blocks_get_block(node->ptrs[block_start]) + block_offset; // where to write from
+    //     }
+        
+    // }
 
-    // copy buffer into -> node data
-    // return error if write to too little space -> 
-    // for read u copy node stuff into buffer -> and can only read size left...
+    // using the size, figure out how many blocks you're going to be affecting
 
-
-    //get block # corresponding with inode - inode_get_bnum?
-    //block_get_block
-    //need cursor to write - writeptr?
-    // need to always know: 1. bytes left on page 2. left to write
-    // need to be able to go to diff page if size is large -> supports more than 4k.
-
+    return size; 
 }
 
-// 
+// Don't need to grow inodes until we start using the indirection pointer
 int storage_truncate(const char *path, off_t size) {
     int inode_num = tree_lookup(path);
     if (inode_num < 0) {

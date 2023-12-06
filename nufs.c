@@ -188,8 +188,6 @@ int nufs_open(const char *path, struct fuse_file_info *fi) {
 // Copied from cs.hmc.edu... 'Read size bytes from the given file into the buffer buf, beginning offset bytes into the file. See read(2) for full details. Returns the number of bytes transferred, or 0 if offset was at or beyond the end of the file. Required for any sensible filesystem.'
 int nufs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
 
-  inode_t *given_file = get_inode(tree_lookup(path)); // get inode from path
-
   // offset / BLOCK_SIZE  -- tells you which of ptrs[] block to read from 
   // offset % BLOCK_SIZE  -- tells you from where on ^that block to start reading from
 
@@ -200,8 +198,8 @@ int nufs_read(const char *path, char *buf, size_t size, off_t offset, struct fus
     // decrement size until it is 0 -- add assert to make sure it's 0 at the end which means you have read all the bytes
 
   // We are returning the number of bytes that transfer from the file to the buffer
-
-  int rv = 6;
+  int rv = storage_read(path, buf, size, offset);
+  // int rv = 6;
   strcpy(buf, "hello\n");
   printf("read(%s, %ld bytes, @+%ld) -> %d\n", path, size, offset, rv);
   return rv;
@@ -215,8 +213,8 @@ int nufs_write(const char *path, const char *buf, size_t size, off_t offset, str
   // Need to ask more about this 
   // Don't really understand if we are copying contents of buf into the file's blocks or what
 
-  // int rv = storage_write(path, buf, size, offset); 
-  int rv = size;
+  int rv = storage_write(path, buf, size, offset); 
+  // int rv = size;
   printf("write(%s, %ld bytes, @+%ld) -> %d\n", path, size, offset, rv);
   return rv;
 }
