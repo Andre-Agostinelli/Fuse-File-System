@@ -101,7 +101,6 @@ int nufs_mknod(const char *path, mode_t mode, dev_t rdev) {
 
   int inum = alloc_inode();
 	inode_t* newnode = get_inode(inum);
-  printf("new inode created for new file with num: %d \n", inum);
   // int dirNum = directory_get_super(path);
 	// inode_t* node = get_inode(dirNum);
 
@@ -115,7 +114,7 @@ int nufs_mknod(const char *path, mode_t mode, dev_t rdev) {
 
     //rv = directory_put(get_inode(directory_get_super(path)), directory_get_name(path), inum);
     rv = 0; // ?
-    printf("mknod(%s, %04o) -> %d\n", path, mode, rv);
+    printf("mknod '%s' (%s, %04o) -> %d\n", newnode->name, path, mode, rv);
     return rv;
 }
 

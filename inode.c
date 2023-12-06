@@ -45,10 +45,12 @@ int shrink_inode(inode_t *node, int size) {
     // needed for storage truncating when reading/writing
 }
 
-// get the block number associated with the inode
+// get the memory location associated with the block index bnum for this inode
 int inode_get_bnum(inode_t *node, int file_bnum) {
-    int block_index = file_bnum / BLOCK_SIZE;
+    // int block_index = file_bnum / BLOCK_SIZE;
 
-    // if file_bnum is greater than 2, it is larger than 2 blocks -> need indirection pointer     
-    return block_index < 2 ? node->ptrs[file_bnum] : ((int*)blocks_get_block(node->iptr))[block_index - 2];
+    // // if file_bnum is greater than 2, it is larger than 2 blocks -> need indirection pointer     
+    // return block_index < 2 ? node->ptrs[file_bnum] : ((int*)blocks_get_block(node->iptr))[block_index - 2];
+
+    return node->ptrs[file_bnum];
 }

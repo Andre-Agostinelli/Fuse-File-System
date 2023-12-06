@@ -44,6 +44,7 @@ int storage_read(const char *path, char *buf, size_t size, off_t offset) {
         return inum; //inum was not found in path -> can't wirte
     }
     inode_t *node = get_inode(inum);
+    printf("Reading file...\n");
     print_inode(node);
 
     // return 0 if the offset is at or beyond the end of the file
@@ -85,13 +86,17 @@ int storage_write(const char *path, const char *buf, size_t size, off_t offset) 
     int written_so_far = 0;
 
     int block_start = offset / BLOCK_SIZE;  //-- tells you which of ptrs[] block to read from 
+    printf("  Starting block: %d\n", block_start);
     int block_offset = offset % BLOCK_SIZE; //-- tells you from where on ^that block to start writing
-    void* data = blocks_get_block(node->ptrs[block_start]) + block_offset; // start of our write
+    printf("  Offset: %d\n", block_offset);
+    void* data = blocks_get_block(node->ptrs[block_start]) + offset; // start of our write
+    printf("  Data: %d\n", data);
     int bytes_remaining = BLOCK_SIZE - block_offset; // bytes remaining in the starting block ("block_start")
 
 
     if (size < bytes_remaining) { // if we have enough room in the starting block
         memcpy(data, buf, size); // copy buf into data (size is how much) -> we know size fits into this block
+        printf("  Writing data: %d\n", data);
     } 
     // else {
     //     // write amount bytes_remaining,
