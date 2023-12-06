@@ -104,8 +104,9 @@ int nufs_mknod(const char *path, mode_t mode, dev_t rdev) {
   // int dirNum = directory_get_super(path);
 	// inode_t* node = get_inode(dirNum);
 
-    newnode->ptrs[0] = -1;
-    newnode->ptrs[1] = -1;
+    // newnode->ptrs[0] = -1;
+    // newnode->ptrs[1] = -1;
+    newnode->block = alloc_block();
     //newnode->refs = 1;
     newnode->mode = mode;
     newnode->iptr = 0;
@@ -197,10 +198,12 @@ int nufs_read(const char *path, char *buf, size_t size, off_t offset, struct fus
     // decrement size until it is 0 -- add assert to make sure it's 0 at the end which means you have read all the bytes
 
   // We are returning the number of bytes that transfer from the file to the buffer
+  size = get_inode(tree_lookup(path))->size;
   int rv = storage_read(path, buf, size, offset);
   // int rv = 6;
-  strcpy(buf, "hello\n");
+  // strcpy(buf, "hello\n");
   printf("read(%s, %ld bytes, @+%ld) -> %d\n", path, size, offset, rv);
+  printf(buf);
   return rv;
 }
 

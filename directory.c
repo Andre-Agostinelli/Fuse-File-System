@@ -22,22 +22,23 @@ void directory_init() {
     // Initialize everything for the root inode...
     root_inode->mode = 040755; // set mode to directory
     root_inode->size = 256; // 256 files
-    root_inode->ptrs[0] = -1; // instead of allocating wasted space
-    root_inode->ptrs[1] = -1; // instead of allocating wasted space
+    // root_inode->ptrs[0] = alloc_block(); // instead of allocating wasted space
+    // root_inode->ptrs[0] = alloc_block(); // instead of allocating wasted space
+    root_inode->block = -1; // instead of allocating wasted space
     root_inode->iptr = 0; //not allocated
     strcpy(root_inode->name, "/");
 
     // directory_put(root_inode, ".", root_inum);
 }
 
-// Put the file given by pathname and inum at DIRECTORY di 
-int directory_put(inode_t *di, const char *name, int inum) {
-    dirent_t* entries = (dirent_t*) blocks_get_block(di->ptrs[0]); // get the directory's entries
-    for (int i = 0; i < MAX_ENTR; i++) {
-        // if (entries[i].inum == 0)
-    }
-    return -1; 
-}
+// // Put the file given by pathname and inum at DIRECTORY di 
+// int directory_put(inode_t *di, const char *name, int inum) {
+//     dirent_t* entries = (dirent_t*) blocks_get_block(di->ptrs[0]); // get the directory's entries
+//     for (int i = 0; i < MAX_ENTR; i++) {
+//         // if (entries[i].inum == 0)
+//     }
+//     return -1; 
+// }
 
 /*
  * Returns the data of the given path's furthest node...

@@ -57,7 +57,7 @@ int storage_read(const char *path, char *buf, size_t size, off_t offset) {
     else {
         int block_start = offset / BLOCK_SIZE;  // get the starting file's starting block
         int block_offset = offset % BLOCK_SIZE; // where to start in ^ that block
-        void* data = blocks_get_block(node->ptrs[block_start]) + block_offset; // pointer to the start point to read from
+        void* data = blocks_get_block(node->block) + block_offset; // pointer to the start point to read from
         // copied from below...
         // int bytes_remaining = BLOCK_SIZE - block_offset; // bytes remaining in the starting block ("block_start")
         
@@ -69,6 +69,7 @@ int storage_read(const char *path, char *buf, size_t size, off_t offset) {
 int storage_write(const char *path, const char *buf, size_t size, off_t offset) {
     // int truncate = storage_truncate(path, size + offset);
 
+    // Get the inode...
     int inum = tree_lookup(path);  // get inum from path
     if (inum < 0) {
         return inum; //inum was not found in path -> can't wirte
@@ -79,10 +80,11 @@ int storage_write(const char *path, const char *buf, size_t size, off_t offset) 
     // call inode grow if offset + size > inodes current size, grow the inode by the difference between those 2
     // ** ONLY GROW, NOT SHRINK ON WRITE **
 
+    // Update the size of the file if necessary
     if (size + offset > node->size) {
         printf("Size+offset: %lu is bigger than inode size:%d\n", size+offset, node->size);
         grow_inode(node, size + offset); // make the inode big enough to write this thing
-        printf("Size+offset: %lu is bigger than inode size:%d\n", size+offset, node->size);
+        printf("Grew inode to size: %d\n", node->size);
     }
 
     int written_so_far = 0;
@@ -91,7 +93,7 @@ int storage_write(const char *path, const char *buf, size_t size, off_t offset) 
     printf("  Starting block: %d\n", block_start);
     int block_offset = offset % BLOCK_SIZE; //-- tells you from where on ^that block to start writing
     printf("  Offset: %d\n", block_offset);
-    void* data = blocks_get_block(node->ptrs[block_start]) + offset; // start of our write
+    void* data = blocks_get_block(node->block) + offset; // start of our write
     printf("  Data: %p\n", data);
     int bytes_remaining = BLOCK_SIZE - block_offset; // bytes remaining in the starting block ("block_start")
 

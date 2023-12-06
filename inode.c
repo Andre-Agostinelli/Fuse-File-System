@@ -1,10 +1,12 @@
 #include "inode.h"
 #include "bitmap.h"
+#include <errno.h>
 
 // Print information about the given inode
 void print_inode(inode_t *node) {
     if (node) { 
-        printf("node mode: %04o, size: %d, ptrs[0]: %d, ptrs[1]: %d, iptr: %d}\n", node->mode, node->size,  node->ptrs[0], node->ptrs[1], node->iptr);
+        // printf("node mode: %04o, size: %d, ptrs[0]: %d, ptrs[1]: %d, iptr: %d}\n", node->mode, node->size,  node->ptrs[0], node->ptrs[1], node->iptr);
+        printf("node mode: %04o, size: %d, block:%d, iptr: %d}\n", node->mode, node->size,  node->block, node->iptr);
     }
     else {
         printf("node{null}\n");
@@ -36,19 +38,7 @@ void free_inode() {
 
 // Grow the inode by the given size
 int grow_inode(inode_t *node, int size) {
-    // needed for storage truncating when reading/writing
-    int current_size = size;
-    if (node->ptrs[0] == -1 && current_size > 0) {
-        node->ptrs[0] = alloc_block();
-        current_size -= BLOCK_SIZE;
-        node->size = node->size + BLOCK_SIZE;
-    } else if (node->ptrs[1] == -1 && current_size > 0) {
-        node->ptrs[1] = alloc_block();
-        current_size -= BLOCK_SIZE;
-        node->size = node->size + BLOCK_SIZE;
-    } else if (current_size > 0) {
-        //TODO: INDIRECTION AA
-    }
+    node->size += size; 
     return node->size;
 }
 
@@ -63,5 +53,5 @@ int inode_get_bnum(inode_t *node, int file_bnum) {
     // // if file_bnum is greater than 2, it is larger than 2 blocks -> need indirection pointer     
     // return block_index < 2 ? node->ptrs[file_bnum] : ((int*)blocks_get_block(node->iptr))[block_index - 2];
 
-    return node->ptrs[file_bnum];
+    return node->block;
 }
