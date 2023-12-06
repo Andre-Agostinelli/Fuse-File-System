@@ -34,9 +34,11 @@ void free_inode() {
     // going to need to implement for deleting files / nufs_unlink
 } 
 
+// Grow the inode by the given size
 int grow_inode(inode_t *node, int size) {
     // needed for storage truncating when reading/writing
-    
+    node->size += size;
+    return node->size;
 }
 
 int shrink_inode(inode_t *node, int size) {

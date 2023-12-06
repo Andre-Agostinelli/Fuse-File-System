@@ -79,8 +79,7 @@ int storage_write(const char *path, const char *buf, size_t size, off_t offset) 
     // ** ONLY GROW, NOT SHRINK ON WRITE **
 
     if (size + offset > node->size) {
-        // grow the inode
-        node->size = size+offset; // TODO: change init of inodes, to only grow when write not on init
+        grow_inode(node, size + offset); // make the inode big enough to write this thing
     }
 
     int written_so_far = 0;
