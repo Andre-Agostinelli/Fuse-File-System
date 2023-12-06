@@ -48,5 +48,5 @@ int inode_get_bnum(inode_t *node, int file_bnum) {
     int block_index = file_bnum / BLOCK_SIZE;
 
     // if file_bnum is greater than 2, it is larger than 2 blocks -> need indirection pointer     
-    return block_index < 2 ? node->ptrs[file_bnum] : ((int*)pages_get_page(node->iptr))[block_index - 2];
+    return block_index < 2 ? node->ptrs[file_bnum] : ((int*)blocks_get_block(node->iptr))[block_index - 2];
 }
