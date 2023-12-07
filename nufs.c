@@ -12,6 +12,7 @@
 #include "storage.h"
 #include "blocks.h"
 #include "inode.h"
+#include "helper.h"
 
 #define FUSE_USE_VERSION 26
 #include <fuse.h>
@@ -63,14 +64,15 @@ int nufs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
   assert(rv == 0);
 
   filler(buf, ".", &st, 0); // add "." 
+  printf(".\n"); // print . first
 
   // add all the names of our inodes
   for (int ii=0; ii<INODE_COUNT; ii++) {
     inode_t* cur_inode = get_inode(ii); // get cur inode
-    if (strcmp(cur_inode->name, "") != 0) { // if this inode's name is not empty
+    if (strcmp(skip_slash(cur_inode->name), "") != 0) { // if this inode's name is not empty
       // printf("    (in readdir), Adding %s \n", cur_inode->name);
-      filler(buf, cur_inode->name, &st, 0); // add this name 
-      printf("%s\n", cur_inode->name); // print it? ask TA 
+      filler(buf, skip_slash(cur_inode->name), &st, 0); // add this name 
+      printf("%s\n", skip_slash(cur_inode->name)); // print it? ask TA 
     } 
   }  
 

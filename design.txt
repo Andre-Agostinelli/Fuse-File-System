@@ -11,3 +11,4 @@
 
 - each inode has 1 direct pointer block 
 - we added a name field to the inode struct, and do not use dirents 
+- note about names... our inode structs actually store the "/" in the inode's name, but in readdir, we skip over that slash and just print "hello.txt" instead of "/hello.txt" for ex. even though we still actually store the / in the inode's name
