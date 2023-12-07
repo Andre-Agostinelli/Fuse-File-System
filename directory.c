@@ -16,19 +16,8 @@ void directory_init() {
     root_inode->mode = 040755; // set mode to directory
     root_inode->size = 256; // 256 files
     root_inode->block = -1; // instead of allocating wasted space
-    root_inode->iptr = 0; // not allocated
+    root_inode->iptr = -1; // not allocated
     strcpy(root_inode->name, "/");
-}
-
-/*
- * Returns the data of the given path's furthest node...
- */
-char* directory_get_name(const char* path) {
-    slist_t* list = s_explode(path, '/');
-    while(list->next) {
-        list = list->next; // will always return furthest right string
-    }
-    return list->data;
 }
 
 // Given the path for a file, returns its inum int

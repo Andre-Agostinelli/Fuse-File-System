@@ -69,10 +69,21 @@ int nufs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
   // add all the names of our inodes
   for (int ii=0; ii<INODE_COUNT; ii++) {
     inode_t* cur_inode = get_inode(ii); // get cur inode
+    // printf("Printing inode:  ");
+    // print_inode(cur_inode);
     if (strcmp(skip_slash(cur_inode->name), "") != 0) { // if this inode's name is not empty
+      // printf("Printing inode: ");
+      // print_inode(cur_inode);
       // printf("    (in readdir), Adding %s \n", cur_inode->name);
-      filler(buf, skip_slash(cur_inode->name), &st, 0); // add this name 
-      printf("%s\n", skip_slash(cur_inode->name)); // print it? ask TA 
+      // printf("mode: %d\n", cur_inode->mode);
+      // if (cur_inode->mode == 16893) { // directory
+      //   // printf("Printing directory\n");
+      //   printf("%s\n", (cur_inode->name)); // print directory WITH the slash
+      // } else {
+      //   printf("%s\n", skip_slash(cur_inode->name)); // print file WITHOUT the slash
+      // }
+      printf("%s\n", skip_slash(cur_inode->name));
+      filler(buf, skip_slash(cur_inode->name), &st, 0); // add this name without the slash
     } 
   }  
 
@@ -95,7 +106,7 @@ int nufs_mknod(const char *path, mode_t mode, dev_t rdev) {
 	inode_t* newnode = get_inode(inum);
   newnode->block = alloc_block();
   newnode->mode = mode;
-  newnode->iptr = 0;
+  newnode->iptr = -1;
   newnode->size = 0;
   strcpy(newnode->name, path);
 

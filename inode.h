@@ -12,8 +12,8 @@
 typedef struct inode {
   // int refs;     // nah
   int mode;        // permission & type
-  int size;        // bytes written
-  int block;       // 2 direct pointers?
+  int size;        // # bytes written
+  int block;       // 1 direct pointer
   int iptr;        // single indirect pointer
   char name[16];   // big enough to be safe
 } inode_t;

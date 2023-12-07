@@ -36,7 +36,7 @@ int storage_stat(const char *path, struct stat *st) {
 // Copied from cs.hmc.edu... 'Read size bytes from the given file into the buffer buf, beginning offset bytes into the file. See read(2) for full details. Returns the number of bytes transferred, or 0 if offset was at or beyond the end of the file. Required for any sensible filesystem.'
 int storage_read(const char *path, char *buf, size_t size, off_t offset) {
 
-    // offset / BLOCK_SIZE  -- tells you which of ptrs[] block to read from 
+    // offset / BLOCK_SIZE  -- tells you which block to read from 
     // offset % BLOCK_SIZE  -- tells you from where on ^that block to start reading from
 
     // (offset + size) / BLOCK_SIZE  --- gives you the block you are ending on
@@ -59,6 +59,7 @@ int storage_read(const char *path, char *buf, size_t size, off_t offset) {
     print_inode(node);
 
     // return 0 if the offset is at or beyond the end of the file
+    // * keep this the same
     if (size + offset > node->size) {
         printf("size: %lu\n", size);
         printf("offset: %lu\n", offset);
@@ -81,7 +82,7 @@ int storage_write(const char *path, const char *buf, size_t size, off_t offset) 
     // Get the inode...
     int inum = tree_lookup(path);  // get inum from path
     if (inum < 0) {
-        return inum; //inum was not found in path -> can't wirte
+        return inum; // inum was not found in path -> can't wirte
     }
     inode_t *node = get_inode(inum);
     print_inode(node);
@@ -98,11 +99,12 @@ int storage_write(const char *path, const char *buf, size_t size, off_t offset) 
 
     int written_so_far = 0;
 
-    int block_start = offset / BLOCK_SIZE;  //-- tells you which of ptrs[] block to read from 
+    int block_start = offset / BLOCK_SIZE;         // tells you which block we are starting to write from 
     printf("  Starting block: %d\n", block_start);
-    int block_offset = offset % BLOCK_SIZE; //-- tells you from where on ^that block to start writing
+    int block_offset = offset % BLOCK_SIZE;        // tells you from where on ^that block to start writing
     printf("  Offset: %d\n", block_offset);
-    void* data = blocks_get_block(node->block) + offset; // start of our write
+    // void* data = blocks_get_block(node->block) + offset; // start of our write
+    void* data = blocks_get_block(inode_get_bnum(node, block_start)) + offset; // start of our write
     printf("  Data: %p\n", data);
     int bytes_remaining = BLOCK_SIZE - block_offset; // bytes remaining in the starting block ("block_start")
 
@@ -111,15 +113,6 @@ int storage_write(const char *path, const char *buf, size_t size, off_t offset) 
         memcpy(data, buf, size); // copy buf into data (size is how much) -> we know size fits into this block
         printf("  Writing data: %p\n", data);
     } 
-    // else {
-    //     // write amount bytes_remaining,
-    //     // start at beginning of block[1]
-    //     // keep writing until written_so_far == size OR 
-    //     while (written_so_far < size) {
-    //         void* data = blocks_get_block(node->ptrs[block_start]) + block_offset; // where to write from
-    //     }
-        
-    // }
 
     // using the size, figure out how many blocks you're going to be affecting
 
