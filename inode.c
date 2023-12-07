@@ -74,6 +74,7 @@ int grow_inode(inode_t *node, int size) {
         }
         // do not have enough room in the last block of this inode, need to alloc more blocks
         else {
+            if (node->iptr == -1) node->iptr = alloc_block(); // alloc the indirect block if necessary
             for (int i = num_blocks_used; i < num_blocks_desired; ++i) { // allocate as many new blocks as you need
                 int* indirection_block = blocks_get_block(node->iptr); // get the block of indirection pointers
                 indirection_block[i] = alloc_block(); // add a new block address to the indir. block
