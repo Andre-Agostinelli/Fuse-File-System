@@ -69,36 +69,16 @@ int grow_inode(inode_t *node, int size) {
         node->size += size; 
         printf("  No new blocks needed to grow to size %d\n", node->size);
         return node->size;
-    }
-
-    // We MAY need new blocks 
-    else {
-        printf("  May need more blocks\n");
-        int* last_block = ((int*) blocks_get_block(inode_get_bnum(node, num_blocks_used - 1))); // the last block used by this 
-        int space_remaining_on_last_block = BLOCK_SIZE - (node->size % BLOCK_SIZE);
-        printf("  %d remaining on the last block of this inode\n", space_remaining_on_last_block);
-
-        if (space_remaining_on_last_block >= size) { // if we have enough rooom on the last block, don't alloc new block
-            node->size += size; 
-            printf("  Grew inode %s to size %d bytes\n", node->name, node->size);
-            return node->size;
+    } else { 
+        printf("  We need sum mo blocks\n");
+        for (int i = num_blocks_used; i <= num_blocks_desired; ++i) { // allocate as many new blocks as you need
+            int* indirection_block = blocks_get_block(node->iptr); // get a pointer to the block where the indirect blocks are stored
+            indirection_block[i] = alloc_block(); // add a new block address to the indir. block
+            printf("Added new indirection block\n");
         }
-        // do not have enough room in the last block of this inode, need to alloc more blocks
-        else {
-            printf("  Need to allocate %d new blocks\n", num_new_blocks);
-            if (node->iptr == -1) node->iptr = alloc_block(); // alloc the indirect block if necessary
-            for (int i = num_blocks_used; i <= num_blocks_desired; ++i) { // allocate as many new blocks as you need
-                int* indirection_block = blocks_get_block(node->iptr); // get a pointer to the block where the indirect blocks are stored
-                indirection_block[i] = alloc_block(); // add a new block address to the indir. block
-                printf("Added new indirection block\n");
-            }
-            node->size += size; 
-            printf("Grew inode %s to size %d bytes\n", node->name, node->size);
-            return node->size;
-        }        
+        node->size += size; 
+        return node->size; 
     }
-    // node->size += size; 
-    // return node->size;
 }
 
 // Shrink the inode down to the given size, return the resulting size
