@@ -148,10 +148,9 @@ int nufs_rmdir(const char *path) {
 // called to move a file within the same filesystem
 // Rename the file, directory, or other object "from" to the target "to". Note that the source and target don't have to be in the same directory, so it may be necessary to move the source to an entirely new directory. See rename(2) for full details.
 int nufs_rename(const char *from, const char *to) {
-  int rv = -1;
-
-  // TODO add some sort of check? 
+  int rv = 0;
   int inum = tree_lookup(from); // get inum from 'from' path
+  if (inum == -1) return -1;
   inode_t* inode = get_inode(inum); // get inode from inum
   strcpy(inode->name, to); // change name to to
 
@@ -184,7 +183,7 @@ int nufs_open(const char *path, struct fuse_file_info *fi) {
 // Actually read data
 // Copied from cs.hmc.edu... 'Read size bytes from the given file into the buffer buf, beginning offset bytes into the file. See read(2) for full details. Returns the number of bytes transferred, or 0 if offset was at or beyond the end of the file. Required for any sensible filesystem.'
 int nufs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
-  size = get_inode(tree_lookup(path))->size;
+  // size = get_inode(tree_lookup(path))->size;
   int rv = storage_read(path, buf, size, offset);
   printf("read(%s, %ld bytes, @+%ld) -> %d\n", path, size, offset, rv);
   printf("%s", buf); // print the contets of the file
