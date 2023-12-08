@@ -2,6 +2,8 @@
 #include "blocks.h"
 #include "bitmap.h" 
 
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+
 // initialize the blocks and the root directory
 void storage_init(const char *path) {
     blocks_init(path); // sets block 0 to used for both bitmaps
@@ -89,17 +91,25 @@ int storage_write(const char *path, const char *buf, size_t size, off_t offset) 
 
     // call inode grow if offset + size > inodes current size, grow the inode by the difference between those 2
     // ** ONLY GROW, NOT SHRINK ON WRITE **
+    int num_blocks_used_intial = bytes_to_blocks(node->size); // # of blocks used by this inode
 
     // Update the size of the file if necessary
     if (size + offset > node->size) {
-        printf("Size+offset: %lu is bigger than inode size:%d\n", size+offset, node->size);
         grow_inode(node, size + offset); // make the inode big enough to write this thing
         printf("Grew inode to size: %d\n", node->size);
     }
 
-    int written_so_far = 0;
+    // Determine the range of blocks affected by the write
+    int block_start = offset / BLOCK_SIZE;
+    int block_end = (offset + size - 1) / BLOCK_SIZE;
 
-    int block_start = offset / BLOCK_SIZE;         // tells you which block we are starting to write from 
+    // Initialize variables for tracking the write progress
+    int bytes_written = 0;
+    int remaining_bytes = size;
+    int current_offset = offset;
+
+    // int block_start = offset / BLOCK_SIZE;         // tells you which block we are starting to write from 
+    // int block_end = (offset + size) / BLOCK_SIZE;     // tells you which block we are starting to write from 
     printf("  Starting block: %d\n", block_start);
     int block_offset = offset % BLOCK_SIZE;        // tells you from where on ^that block to start writing
     printf("  Offset: %d\n", block_offset);
@@ -112,7 +122,30 @@ int storage_write(const char *path, const char *buf, size_t size, off_t offset) 
     if (size < bytes_remaining) { // if we have enough room in the starting block
         memcpy(data, buf, size); // copy buf into data (size is how much) -> we know size fits into this block
         printf("  Writing data: %p\n", data);
-    } 
+    } else {
+            // Loop through each block and perform the write
+        for (int block_num = block_start; block_num <= block_end; ++block_num) {
+            // Calculate the offset within the current block
+            int block_offset = current_offset % BLOCK_SIZE;
+
+            // Get a pointer to the block where data will be written
+            void* data_block = blocks_get_block(inode_get_bnum(node, block_num));
+
+            // Number of bytes that can be written to this block
+            // We are either filling this entire block or only writing the amt of bytes remaining if that happens to be less
+            int bytes_to_write = MIN(remaining_bytes, BLOCK_SIZE - block_offset);
+
+            // Copy data from the buffer to the block
+            memcpy(data_block + block_offset, buf + bytes_written, bytes_to_write);
+
+            // Update tracking variables
+            current_offset += bytes_to_write;
+            bytes_written += bytes_to_write;
+            remaining_bytes -= bytes_to_write;
+        }
+
+        return bytes_written;
+    }
 
     // using the size, figure out how many blocks you're going to be affecting
 
