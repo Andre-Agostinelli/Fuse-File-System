@@ -13,6 +13,7 @@ void storage_init(const char *path) {
     if (bitmap_get(block_bitmap, 1) == 0) {
         directory_init(); 
     }
+    
 }
 
 // Get attributes based on path and fill given storage struct
@@ -104,7 +105,7 @@ int storage_read(const char *path, char *buf, size_t size, off_t offset) {
     printf("+ storage_read(%s); inode %d\n", path, inum);
     print_inode(node);
 
-    printf("  Reading %d bytes from the file %s, starting %d bytes into the file's data\n", size, node->name, offset);
+    printf("  Reading %ld bytes from the file %s, starting %ld bytes into the file's data\n", size, node->name, offset);
 
     // ensures offset is accurate
     if (offset >= node->size) {
@@ -116,10 +117,9 @@ int storage_read(const char *path, char *buf, size_t size, off_t offset) {
     if (offset + size >= node->size) {
         int oldsize = size; 
         size = node->size - offset;
-        printf("  File %s only has %d bytes, so adjusting size to %d. No need to try and read %d bytes...\n", node->name, node->size, size, oldsize);
+        printf("  File %s only has %d bytes, so adjusting size to %ld. No need to try and read %d bytes...\n", node->name, node->size, size, oldsize);
     }
 
-    int bytes_read_so_far = 0; // the number of bytes we have read SO FAR
     // size equals the number of bytes that we WANT to read
 
     // Determine the range of blocks affected by the read
@@ -129,9 +129,9 @@ int storage_read(const char *path, char *buf, size_t size, off_t offset) {
     printf("  Read will end on block %d\n", block_end);
 
     // Initialize variables for tracking the write progress
-    int bytes_written = 0;
-    int remaining_bytes = size;
-    int current_offset = offset;
+    int bytes_read_so_far = 0;    // the number of bytes we have read SO FAR
+    int remaining_bytes = size;   // # of bytes left to read 
+    int current_offset = offset;  // the current offset within the current block
 
     void* data = blocks_get_block(inode_get_bnum(node, block_start)) + offset; // start of our read
     int block_offset = offset % BLOCK_SIZE;          // how far into that block to start reading
@@ -164,11 +164,13 @@ int storage_read(const char *path, char *buf, size_t size, off_t offset) {
 
             // Update tracking variables
             current_offset += bytes_reading_from_block;
-            // bytes_written += bytes_reading_from_block;
-            remaining_bytes -= bytes_reading_from_block;
             bytes_read_so_far += bytes_reading_from_block;
+            remaining_bytes -= bytes_reading_from_block;
+            printf("  current offset is now %d\n", current_offset);
+            printf("  we have read %d bytes so far\n", bytes_read_so_far);
+            printf("  %d bytes left to read\n", remaining_bytes);
         }
-        printf("  wrote %d bytes TOTAL. The write is now complete.\n", bytes_read_so_far);
+        printf("  read %d bytes TOTAL. The write is now complete.\n", bytes_read_so_far);
         return bytes_read_so_far;
     }
 
@@ -200,6 +202,7 @@ int storage_write(const char *path, const char *buf, size_t size, off_t offset) 
     printf("  Offset: %d\n", block_offset);
     // void* data = blocks_get_block(node->block) + offset; // start of our write
     void* data = blocks_get_block(inode_get_bnum(node, block_start)) + offset; // start of our write
+    printf("Writing to %d\n", inode_get_bnum(node, block_start));
     printf("  Data: %p\n", data);
     int bytes_remaining = BLOCK_SIZE - block_offset; // bytes remaining in the starting block ("block_start")
 

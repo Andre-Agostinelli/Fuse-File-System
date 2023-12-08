@@ -74,7 +74,7 @@ int grow_inode(inode_t *node, int size) {
         for (int i = num_blocks_used; i <= num_blocks_desired; ++i) { // allocate as many new blocks as you need
             int* indirection_block = blocks_get_block(node->iptr); // get a pointer to the block where the indirect blocks are stored
             indirection_block[i] = alloc_block(); // add a new block address to the indir. block
-            printf("Added new indirection block\n");
+            printf("Added new indirection block at %d\n", indirection_block[i]);
         }
         node->size += size; 
         return node->size; 

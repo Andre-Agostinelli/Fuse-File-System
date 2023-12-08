@@ -6,7 +6,8 @@
 
 // Initialize the root directory
 void directory_init() {    
-    bitmap_put(get_blocks_bitmap(), 1, 1); // marking block 1 as occupied for root
+    bitmap_put(get_blocks_bitmap(), 1, 1); // marking block 1 as occupied for inodes
+    bitmap_put(get_blocks_bitmap(), 2, 1); // marking block 2 as occupied for inodes
     bitmap_put(get_inode_bitmap(), 0, 1); // mark inode 0 as occupied for root
 
     int root_inum = ROOT_INUM; // ROOT_INUM is 0
