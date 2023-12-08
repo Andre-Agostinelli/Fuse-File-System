@@ -25,5 +25,6 @@ void free_inode(int inum);
 int grow_inode(inode_t *node, int size);
 int shrink_inode(inode_t *node, int size);
 int inode_get_bnum(inode_t *node, int file_bnum);
+void free_data_blocks(inode_t *node);
 
 #endif
