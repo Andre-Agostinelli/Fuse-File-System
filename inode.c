@@ -72,8 +72,9 @@ int grow_inode(inode_t *node, int size) {
     } else { 
         printf("  We need sum mo blocks\n");
         for (int i = num_blocks_used; i <= num_blocks_desired; ++i) { // allocate as many new blocks as you need
+            if (node->iptr == -1) node->iptr = alloc_block();           // should never reach this
             int* indirection_block = blocks_get_block(node->iptr); // get a pointer to the block where the indirect blocks are stored
-            indirection_block[i] = alloc_block(); // add a new block address to the indir. block
+            indirection_block[i] = alloc_block(); // add a new bnum to the indir. block
             printf("Added new indirection block at %d\n", indirection_block[i]);
         }
         node->size += size; 

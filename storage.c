@@ -13,7 +13,7 @@ void storage_init(const char *path) {
     if (bitmap_get(block_bitmap, 1) == 0) {
         directory_init(); 
     }
-    
+
 }
 
 // Get attributes based on path and fill given storage struct
@@ -133,8 +133,10 @@ int storage_read(const char *path, char *buf, size_t size, off_t offset) {
     int remaining_bytes = size;   // # of bytes left to read 
     int current_offset = offset;  // the current offset within the current block
 
-    void* data = blocks_get_block(inode_get_bnum(node, block_start)) + offset; // start of our read
+    // void* data = blocks_get_block(inode_get_bnum(node, block_start)) + offset; // start of our read
     int block_offset = offset % BLOCK_SIZE;          // how far into that block to start reading
+    void* data = blocks_get_block(inode_get_bnum(node, block_start)) + block_offset; // start of our read
+
     int bytes_remaining_in_starting_block = BLOCK_SIZE - block_offset; // bytes remaining in the starting block ("block_start")
 
     if (size < bytes_remaining_in_starting_block) { // if we have enough room in the starting block to finish the read
@@ -190,7 +192,7 @@ int storage_write(const char *path, const char *buf, size_t size, off_t offset) 
 
     // Determine the range of blocks affected by the write
     int block_start = offset / BLOCK_SIZE;
-    int block_end = (offset + size - 1) / BLOCK_SIZE;
+    int block_end = (offset + size) / BLOCK_SIZE;
 
     // Initialize variables for tracking the write progress
     int bytes_written = 0;
