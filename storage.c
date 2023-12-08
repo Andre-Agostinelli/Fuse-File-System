@@ -36,60 +36,66 @@ int storage_stat(const char *path, struct stat *st) {
 
 // Read all the files we have and fill the buffer
 // Copied from cs.hmc.edu... 'Read size bytes from the given file into the buffer buf, beginning offset bytes into the file. See read(2) for full details. Returns the number of bytes transferred, or 0 if offset was at or beyond the end of the file. Required for any sensible filesystem.'
+// int storage_read(const char *path, char *buf, size_t size, off_t offset) {
+//     int inum = tree_lookup(path);
+//     if (inum < 0) {
+//         return inum;
+//     }
+//     inode_t *node = get_inode(inum);
+//     printf("+ storage_read(%s); inode %d\n", path, inum);
+//     print_inode(node);
+
+//     // can't read 
+//     if (offset >= node->size) { 
+//         return 0;
+//     }
+
+//     // adjust size if necessary
+//     if (offset + size >= node->size) { 
+//         size = node->size - offset;
+//     }
+
+//     int numRead = 0;
+
+//     // Determine the range of blocks affected by the read
+//     int block_start = offset / BLOCK_SIZE;
+//     int block_end = (offset + size - 1) / BLOCK_SIZE;
+
+//     // Initialize variables for tracking the read process
+//     int bytes_read = 0;
+//     int remaining_bytes = size;
+//     int current_offset = offset;
+
+//     for (int block_num = block_start; block_num <= block_end; ++block_num) {
+//             // Calculate the offset within the current block
+//             int block_offset = current_offset % BLOCK_SIZE;
+//             printf("  block_offset: %d\n", block_offset);
+
+//             // Get a pointer to the block where data will be written
+//             void* data_block = blocks_get_block(inode_get_bnum(node, block_num));
+//             printf("  getting block_num: %d\n", block_num);
+
+//             // Number of bytes that can be written to this block
+//             // We are either filling this entire block or only writing the amt of bytes remaining if that happens to be less
+//             int bytes_to_read = MIN(remaining_bytes, BLOCK_SIZE - block_offset);
+//             printf("  bytes_to_read: %d\n bytes", bytes_to_read);
+
+//             // Copy data from the buffer to the block
+//             // memcpy(data_block + block_offset, buf + bytes_written, bytes_to_read);
+//             memcpy(buf + bytes_read, data_block + block_offset, bytes_to_read);
+//             printf("  copied %d bytes\n", bytes_to_read);
+
+//             // Update tracking variables
+//             current_offset += bytes_to_read;
+//             bytes_read += bytes_to_read;
+//             remaining_bytes -= bytes_to_read;
+//         }
+//     printf("Read %ld bytes\n", size);
+//     return size;
+// }
+
+// 'Read size bytes from the given file into the buffer buf, beginning offset bytes into the file.
 int storage_read(const char *path, char *buf, size_t size, off_t offset) {
-
-    // offset / BLOCK_SIZE  -- tells you which block to read from 
-    // offset % BLOCK_SIZE  -- tells you from where on ^that block to start reading from
-
-    // (offset + size) / BLOCK_SIZE  --- gives you the block you are ending on
-    // (offset + size) % BLOCK_SIZE  --- tells you where exactly on ^that block you're ending
-
-    // Just fill the buffer 'buf' with the contents of the file 
-    // decrement size until it is 0 -- add assert to make sure it's 0 at the end which means you have read all the bytes
-
-    // We are returning the number of bytes that transfer from the file to the buffer
-
-    // // UNCOMMENT
-
-    // // get the inode
-    // int inum = tree_lookup(path);  // get inum from path
-    // if (inum < 0) {
-    //     return inum; //inum was not found in path -> can't wirte
-    // }
-    // inode_t *node = get_inode(inum);
-    // printf("Reading file...\n");
-    // print_inode(node);
-
-    // // return 0 if the offset is at or beyond the end of the file
-    // // * keep this the same
-    // if (size + offset > node->size) {
-    //     printf("size: %lu\n", size);
-    //     printf("offset: %lu\n", offset);
-    //     printf("Size+offset: %lu is bigger than inode size:%d\n", size+offset, node->size);
-    //     return 0;
-    // }
-    // else {
-    //     int block_start = offset / BLOCK_SIZE;  // get the file's starting block
-    //     int block_offset = offset % BLOCK_SIZE; // where to start in ^ that block
-    //     int block_end = (offset + size - 1) / BLOCK_SIZE;
-    //     void* data = blocks_get_block(node->block) + block_offset; // pointer to the start point to read from
-    //     // copied from below...
-    //     // int bytes_remaining = BLOCK_SIZE - block_offset; // bytes remaining in the starting block ("block_start")
-        
-    //     memcpy(buf, data, size); // read the data from data->buf of amt size
-    //     return size; 
-
-    //     // Loop through each block and perform the read
-    //     while (size > 0) {
-    //         int blocks_read = 1;
-
-
-    //         size -= blocks_read;
-    //     }
-    // }
-    // END UNCOMMENT
-
-
     int inum = tree_lookup(path);
     if (inum < 0) {
         return inum;
@@ -98,73 +104,79 @@ int storage_read(const char *path, char *buf, size_t size, off_t offset) {
     printf("+ storage_read(%s); inode %d\n", path, inum);
     print_inode(node);
 
-    // can't read 
-    if (offset >= node->size) { 
+    printf("  Reading %d bytes from the file %s, starting %d bytes into the file's data\n", size, node->name, offset);
+
+    // ensures offset is accurate
+    if (offset >= node->size) {
+        printf("  Offset inaccurate, returning 0.\n");
         return 0;
     }
 
-    // adjust size if necessary
-    if (offset + size >= node->size) { 
+    // Adjust size of read if attempting to read beyond cur size
+    if (offset + size >= node->size) {
+        int oldsize = size; 
         size = node->size - offset;
+        printf("  File %s only has %d bytes, so adjusting size to %d. No need to try and read %d bytes...\n", node->name, node->size, size, oldsize);
     }
 
-    int numRead = 0;
+    int bytes_read_so_far = 0; // the number of bytes we have read SO FAR
+    // size equals the number of bytes that we WANT to read
 
     // Determine the range of blocks affected by the read
     int block_start = offset / BLOCK_SIZE;
     int block_end = (offset + size - 1) / BLOCK_SIZE;
+    printf("  Read will start from block %d\n", block_start);
+    printf("  Read will end on block %d\n", block_end);
 
-    // Initialize variables for tracking the read process
-    int bytes_read = 0;
+    // Initialize variables for tracking the write progress
+    int bytes_written = 0;
     int remaining_bytes = size;
     int current_offset = offset;
 
-    for (int block_num = block_start; block_num <= block_end; ++block_num) {
-            // Calculate the offset within the current block
-            int block_offset = current_offset % BLOCK_SIZE;
-            printf("  block_offset: %d\n", block_offset);
+    void* data = blocks_get_block(inode_get_bnum(node, block_start)) + offset; // start of our read
+    int block_offset = offset % BLOCK_SIZE;          // how far into that block to start reading
+    int bytes_remaining_in_starting_block = BLOCK_SIZE - block_offset; // bytes remaining in the starting block ("block_start")
 
-            // Get a pointer to the block where data will be written
+    if (size < bytes_remaining_in_starting_block) { // if we have enough room in the starting block to finish the read
+        printf("Just reading from the block we started on\n");
+        memcpy(buf, data, size); // copy #size bytes into buf from data 
+    } else {
+        // Loop through each block and perform the read
+        for (int block_num = block_start; block_num <= block_end; ++block_num) {
+            // Get a pointer to the block where data will be read from
+            // alloc block if it doesnt exist? 
             void* data_block = blocks_get_block(inode_get_bnum(node, block_num));
             printf("  getting block_num: %d\n", block_num);
 
-            // Number of bytes that can be written to this block
-            // We are either filling this entire block or only writing the amt of bytes remaining if that happens to be less
-            int bytes_to_read = MIN(remaining_bytes, BLOCK_SIZE - block_offset);
-            printf("  bytes_to_read: %d\n bytes", bytes_to_read);
+            // Calculate the offset within the current block
+            int block_offset = current_offset % BLOCK_SIZE;
+            printf("  block_offset (within the current block): %d\n", block_offset);
 
-            // Copy data from the buffer to the block
-            // memcpy(data_block + block_offset, buf + bytes_written, bytes_to_read);
-            memcpy(buf + bytes_read, data_block + block_offset, bytes_to_read);
-            printf("  copied %d bytes\n", bytes_to_read);
+            // Number of bytes that can be read from this block
+            // Either reading this entire block or only the amt of bytes remaining to read if that happens to be less
+            int bytes_reading_from_block = MIN(remaining_bytes, BLOCK_SIZE - block_offset);
+            printf("  read %d bytes from this block\n", bytes_reading_from_block);
+
+            // Copy data from the block to the buffer
+            memcpy(buf + bytes_read_so_far, data_block + block_offset, bytes_reading_from_block);
+            printf("  copied %d bytes into the buffer, starting at %d\n", bytes_reading_from_block, bytes_read_so_far);
+            
 
             // Update tracking variables
-            current_offset += bytes_to_read;
-            bytes_read += bytes_to_read;
-            remaining_bytes -= bytes_to_read;
+            current_offset += bytes_reading_from_block;
+            // bytes_written += bytes_reading_from_block;
+            remaining_bytes -= bytes_reading_from_block;
+            bytes_read_so_far += bytes_reading_from_block;
         }
+        printf("  wrote %d bytes TOTAL. The write is now complete.\n", bytes_read_so_far);
+        return bytes_read_so_far;
+    }
 
-
-    // // iterates until enough bytes are read
-    // while (numRead < size) {
-    //     int bnum = inode_get_bnum(node, offset + numRead);
-    //     char *pagestart = blocks_get_block(bnum);
-    //     char *readPtr = pagestart + ((offset + numRead) % 4096);
-
-    //     int bytesToRead = 0;
-    //     int leftOnPage = size - numRead;
-    //     int pageRem = pagestart + 4096 - readPtr;
-    //     (leftOnPage <= pageRem) ? (bytesToRead = leftOnPage) : (bytesToRead = pageRem);
-    //     printf(" + reading from page: %d\n", bnum);
-    //     memcpy(buf + numRead, readPtr, bytesToRead);
-    //     numRead += bytesToRead;
-    // }
-    printf("Read %ld bytes\n", size);
     return size;
 }
 
 int storage_write(const char *path, const char *buf, size_t size, off_t offset) {
-    storage_truncate(path, size+offset); // make the inode big enough to write this thing
+    storage_truncate(path, size+offset); // adjust the size of the file if necessary
     // Get the inode...
     int inum = tree_lookup(path);  // get inum from path
     if (inum < 0) {
@@ -173,12 +185,6 @@ int storage_write(const char *path, const char *buf, size_t size, off_t offset) 
     inode_t *node = get_inode(inum);
     printf("+ storage_write(%s); inode %d\n", path, inum);
     print_inode(node);
-
-    // // Update the size of the file if necessary
-    // if (size + offset > node->size) {
-    //     // grow_inode(node, size + offset); // make the inode big enough to write this thing
-    //     printf("Grew inode to size: %d\n", node->size);
-    // }
 
     // Determine the range of blocks affected by the write
     int block_start = offset / BLOCK_SIZE;
