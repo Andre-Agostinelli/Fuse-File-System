@@ -54,9 +54,11 @@ int grow_inode(inode_t *node, int size) {
     printf("  Growing inode %s\n", node->name);
     printf("  inode %s is currently of size %d\n", node->name, node->size);
     int num_blocks_used = bytes_to_blocks(node->size); // # of blocks used by this inode
-    printf("  currently using %d blocks\n" + num_blocks_used);
+    // int num_blocks_used = ((int) node->size) / 4096; // # of blocks used by this inode // WHY DOES THIS EVALUATE TO SOME HUGE NUMBER
+    printf("  node size: %d\n", node->size);
+    printf("  currently using %d blocks\n", num_blocks_used);
     int num_blocks_desired = bytes_to_blocks(node->size + size); // # of blocks needed for cur inode size + size 
-    printf("  want to use %d blocks\n" + num_blocks_desired);
+    printf("  want to use %d blocks\n", num_blocks_desired);
 
     // check difference between the two (how many new blocks u want to alloc)
     int num_new_blocks = num_blocks_desired - num_blocks_used;

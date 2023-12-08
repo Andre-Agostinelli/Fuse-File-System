@@ -246,7 +246,7 @@ int storage_truncate(const char *path, off_t size) {
 
     inode_t* inode = get_inode(inode_num);
     if (size > inode->size) {
-        int rv = grow_inode(inode, (size-(inode->size)));
+        int rv = grow_inode(inode, (size-(inode->size))); // grow the inode by exactly this many bytes (size-(inode->size)) is exactly how many bytes we need
         printf("storage_truncate returning %d\n", rv);
         return rv;
     } 
