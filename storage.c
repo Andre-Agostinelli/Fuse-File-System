@@ -113,8 +113,6 @@ int storage_read(const char *path, char *buf, size_t size, off_t offset) {
         return 0;
     }
 
-    
-
     // Adjust size of read if attempting to read beyond cur size
     if (offset + size >= node->size) {
         int oldsize = size; 
@@ -165,7 +163,6 @@ int storage_read(const char *path, char *buf, size_t size, off_t offset) {
             memcpy(buf + bytes_read_so_far, data_block + block_offset, bytes_reading_from_block);
             printf("  copied %d bytes into the buffer, starting at %d\n", bytes_reading_from_block, bytes_read_so_far);
             
-
             // Update tracking variables
             current_offset += bytes_reading_from_block;
             bytes_read_so_far += bytes_reading_from_block;
@@ -222,62 +219,6 @@ int storage_write(const char *path, const char *buf, size_t size, off_t offset) 
     printf("new node size: %d\n", node->size);
     printf("write(%s, %ld bytes, @+%ld) -> %ld\n", path, size, offset, size);
     return size;
-
-    // // Determine the range of blocks affected by the write
-    // int block_start = offset / BLOCK_SIZE;
-    // int block_end = (offset + size) / BLOCK_SIZE;
-
-    // // Initialize variables for tracking the write progress
-    // int bytes_written = 0;
-    // int remaining_bytes = size;
-    // int current_offset = offset;
-
-    // printf("  Starting block: %d\n", block_start);
-    // int block_offset = offset % BLOCK_SIZE;        // tells you from where on ^that block to start writing
-    // printf("  Offset: %d\n", block_offset);
-    // // void* data = blocks_get_block(node->block) + offset; // start of our write
-    // void* data = blocks_get_block(inode_get_bnum(node, block_start)) + offset; // start of our write
-    // printf("Writing to %d\n", inode_get_bnum(node, block_start));
-    // printf("  Data: %p\n", data);
-    // int bytes_remaining = BLOCK_SIZE - block_offset; // bytes remaining in the starting block ("block_start")
-
-
-    // if (size < bytes_remaining) { // if we have enough room in the starting block
-    //     memcpy(data, buf, size); // copy buf into data (size is how much) -> we know size fits into this block
-    // } else {
-    //         // Loop through each block and perform the write
-    //     for (int block_num = block_start; block_num <= block_end; ++block_num) {
-    //         // Calculate the offset within the current block
-    //         int block_offset = current_offset % BLOCK_SIZE;
-    //         printf("  block_offset: %d\n", block_offset);
-
-    //         // Get a pointer to the block where data will be written
-    //         // alloc block if it doesnt exit
-    //         void* data_block = blocks_get_block(inode_get_bnum(node, block_num));
-    //         printf("  getting block_num: %d\n", block_num);
-
-    //         // Number of bytes that can be written to this block
-    //         // We are either filling this entire block or only writing the amt of bytes remaining if that happens to be less
-    //         int bytes_to_write = MIN(remaining_bytes, BLOCK_SIZE - block_offset);
-    //         printf("  bytes_to_write: %d bytes\n", bytes_to_write);
-
-    //         // Copy data from the buffer to the block
-    //         memcpy(data_block + block_offset, buf + bytes_written, bytes_to_write);
-    //         printf("  copied %d bytes\n", bytes_to_write);
-            
-
-    //         // Update tracking variables
-    //         current_offset += bytes_to_write;
-    //         bytes_written += bytes_to_write;
-    //         remaining_bytes -= bytes_to_write;
-    //     }
-    //     printf("  wrote %d bytes\n", bytes_written);
-    //     return bytes_written;
-    // }
-
-    // // using the size, figure out how many blocks you're going to be affecting
-
-    // return size; 
 }
 
 // Truncate or extend the given file so that it is precisely size bytes long.

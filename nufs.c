@@ -72,16 +72,6 @@ int nufs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
     // printf("Printing inode:  ");
     // print_inode(cur_inode);
     if (strcmp(skip_slash(cur_inode->name), "") != 0) { // if this inode's name is not empty
-      // printf("Printing inode: ");
-      // print_inode(cur_inode);
-      // printf("    (in readdir), Adding %s \n", cur_inode->name);
-      // printf("mode: %d\n", cur_inode->mode);
-      // if (cur_inode->mode == 16893) { // directory
-      //   // printf("Printing directory\n");
-      //   printf("%s\n", (cur_inode->name)); // print directory WITH the slash
-      // } else {
-      //   printf("%s\n", skip_slash(cur_inode->name)); // print file WITHOUT the slash
-      // }
       printf("%s\n", skip_slash(cur_inode->name));
       filler(buf, skip_slash(cur_inode->name), &st, 0); // add this name without the slash
     } 
