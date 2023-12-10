@@ -256,8 +256,10 @@ int storage_truncate(const char *path, off_t size) {
     }
 
     inode_t* inode = get_inode(inode_num);
+    printf("inode SIZE: %d\n", inode->size);
     if (size > inode->size) {
-        int rv = grow_inode(inode, (size-(inode->size))); // grow the inode by exactly this many bytes (size-(inode->size)) is exactly how many bytes we need
+        // int rv = grow_inode(inode, (size-(inode->size))); 
+        int rv = grow_inode(inode, size); 
         printf("storage_truncate returning %d\n", rv);
         return rv;
     } 

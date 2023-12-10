@@ -51,35 +51,60 @@ void free_inode(int inum) {
 
 // Grow the inode by the given size, returning the new size
 int grow_inode(inode_t *node, int size) {
-    printf("  Growing inode %s\n", node->name);
-    printf("  inode %s is currently of size %d\n", node->name, node->size);
-    int num_blocks_used = bytes_to_blocks(node->size); // # of blocks used by this inode
-    // int num_blocks_used = ((int) node->size) / 4096; // # of blocks used by this inode // WHY DOES THIS EVALUATE TO SOME HUGE NUMBER
-    printf("  node size: %d\n", node->size);
-    printf("  currently using %d blocks\n", num_blocks_used);
-    int num_blocks_desired = bytes_to_blocks(node->size + size); // # of blocks needed for cur inode size + size 
-    printf("  want to use %d blocks\n", num_blocks_desired);
 
-    // check difference between the two (how many new blocks u want to alloc)
-    int num_new_blocks = num_blocks_desired - num_blocks_used;
-    printf("  Need %d new blocks\n", num_new_blocks);
+    int blocks_required = bytes_to_blocks(size); // tells total blocks needed for an inode this size...
 
-    // Case where no new blocks are needed
-    if (num_new_blocks == 0) {
-        node->size += size; 
-        printf("  No new blocks needed to grow to size %d\n", node->size);
-        return node->size;
-    } else { 
-        printf("  We need sum mo blocks\n");
-        for (int i = num_blocks_used; i <= num_blocks_desired; ++i) { // allocate as many new blocks as you need
-            if (node->iptr == -1) node->iptr = alloc_block();           // should never reach this
-            int* indirection_block = blocks_get_block(node->iptr); // get a pointer to the block where the indirect block bnums are stored
-            indirection_block[i] = alloc_block(); // add a new bnum to the indir. block
-            printf("Added new indirection block at %d\n", indirection_block[i]);
-        }
-        node->size += size; 
-        return node->size; 
+    // Case: can't fit in direct block
+    if (blocks_required > 1) {
+        blocks_required = blocks_required - 1;
+        if (node->iptr == -1) node->iptr = alloc_block();           
+        //should always have indirection block atp
+        int* indirection_block = (int*) blocks_get_block(node->iptr); // get a pointer to the block where the indirect block bnums are stored
+        
+        for (int i = 0; i < blocks_required; ++i) {
+            if (indirection_block[i] == 0) { //means new block must be alloc'd
+				indirection_block[i] = alloc_block();
+			}
+		}
     }
+
+    printf("growing inode: from size %d, to size: %d---------", node->size, size);
+    node->size = size; //if indirect is not needed then we will drop through and just assign new node size corresponding to direct block.
+	return node->size;
+
+
+    // printf("  Growing inode %s\n", node->name);
+    // printf("  inode %s is currently of size %d\n", node->name, node->size);
+    // int num_blocks_used = bytes_to_blocks(node->size); // # of blocks used by this inode
+
+
+    // printf("  node size: %d\n", node->size);
+    // printf("  currently using %d blocks\n", num_blocks_used);
+    // int num_blocks_desired = bytes_to_blocks(node->size + size); 
+    // # of blocks needed for cur inode size + size  - AA logic to me here doesnt make sense, why subtract inode size in beginning just to re-add
+    //could add  -- if (num_blocks_used == 0 || num_blocks_desired == 1) {return size};
+    // printf("  want to use %d blocks\n", num_blocks_desired);
+
+    // // check difference between the two (how many new blocks u want to alloc)
+    // int num_new_blocks = num_blocks_desired - num_blocks_used;
+    // printf("  Need %d new blocks\n", num_new_blocks);
+
+    // // Case where no new blocks are needed
+    // if (num_new_blocks == 0) {
+    //     node->size += size; 
+    //     printf("  No new blocks needed to grow to size %d\n", node->size);
+    //     return node->size;
+    // } else { 
+    //     printf("  We need sum mo blocks\n");
+    //     for (int i = num_blocks_used; i < num_blocks_desired; ++i) { // allocate as many new blocks as you need
+    //         if (node->iptr == -1) node->iptr = alloc_block();           // should never reach this
+    //         int* indirection_block = blocks_get_block(node->iptr); // get a pointer to the block where the indirect block bnums are stored
+    //         indirection_block[i] = alloc_block(); // add a new bnum to the indir. block
+    //         printf("Added new indirection block at %d\n", indirection_block[i]);
+    //     }
+    //     node->size += size; 
+    //     return node->size; 
+    // }
 }
 
 // Shrink the inode down to the given size, return the resulting size
