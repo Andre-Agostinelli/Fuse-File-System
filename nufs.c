@@ -2,7 +2,6 @@
 
 #include <assert.h>
 #include <bsd/string.h>
-// #include <dirent.h>
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
@@ -122,12 +121,14 @@ int nufs_unlink(const char *path) {
   return rv;
 }
 
+// Not needed: we don't use ref field
 int nufs_link(const char *from, const char *to) {
   int rv = -1;
   printf("link(%s => %s) -> %d\n", from, to, rv);
   return rv;
 }
 
+// Technically not supported
 int nufs_rmdir(const char *path) {
   int rv = -1;
   printf("rmdir(%s) -> %d\n", path, rv);
@@ -205,6 +206,7 @@ int nufs_ioctl(const char *path, int cmd, void *arg, struct fuse_file_info *fi,
   return rv;
 }
 
+// Inits all operations for fuse to work of off nufs.c file
 void nufs_init_ops(struct fuse_operations *ops) {
   memset(ops, 0, sizeof(struct fuse_operations));
   ops->access = nufs_access;

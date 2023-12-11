@@ -13,6 +13,7 @@
 
 #include "slist.h"
 
+// Appends to current s_list
 slist_t *s_cons(const char *text, slist_t *rest) {
   slist_t *xs = malloc(sizeof(slist_t));
   xs->data = strdup(text);
@@ -21,6 +22,7 @@ slist_t *s_cons(const char *text, slist_t *rest) {
   return xs;
 }
 
+// Frees all data in list
 void s_free(slist_t *xs) {
   if (xs == 0) {
     return;
@@ -35,6 +37,7 @@ void s_free(slist_t *xs) {
   }
 }
 
+// Used to differentiate directory entries
 slist_t *s_explode(const char *text, char delim) {
   if (*text == 0) {
     return 0;

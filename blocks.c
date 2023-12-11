@@ -2,7 +2,7 @@
  * @file blocks.c
  * @author CS3650 staff
  *
- * Implementatino of a block-based abstraction over a disk image file.
+ * Implementation of a block-based abstraction over a disk image file.
  */
 #define _GNU_SOURCE
 #include <string.h>
@@ -22,10 +22,10 @@
 
 const int BLOCK_COUNT = 256; // we split the "disk" into 256 blocks
 const int BLOCK_SIZE = 4096; // = 4K
-const int NUFS_SIZE = BLOCK_SIZE * BLOCK_COUNT; // = 1MB
+const int NUFS_SIZE = BLOCK_SIZE * BLOCK_COUNT; // = 1MB Total size
 
 const int BLOCK_BITMAP_SIZE = BLOCK_COUNT / 8;
-// Note: assumes block count is divisible by 8
+// Note: assumes block count is divisible by 8 -> should easily map
 
 static int blocks_fd = -1;
 static void *blocks_base = 0;
