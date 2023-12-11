@@ -46,7 +46,7 @@ This project implements a simple file system with the following design considera
       - Can store max (253 open blocks / (25 blocks needed for 100k + 1 block of indirection pointers)) = 9 files with 100k size
     - Writing and Reading to at least 1 file with size 500K
       - Can store max (253 open blocks / (123 blocks needed for 500k + 1 block of indirection)) = 2 files with 500k size
-    - * NOT ALL PREVIOUS ASSUMPTIONS WERE MADE BASED ON A CLEAN/NEW DISK *
+    - * NOTE: ALL PREVIOUS ASSUMPTIONS WERE MADE BASED ON A CLEAN/NEW DISK *
 
 
 ## [Project 2 Assignment Page](https://khoury-cs3650.github.io/p2.html)
@@ -66,19 +66,19 @@ You might need install an additional package to run the provided tests as well a
 $ sudo apt-get install libtest-simple-perl
 
 $ sudo apt-get install libfuse-dev libbsd-dev pkg-config
-// Installs these packages:
+// Install's these packages:
 libfuse-dev
 libbsd-dev
 pkg-config
 ```
 ## Makefile:
 
-  - Supported make commands:
-  
-  -[test](test) - Running 'make test' will run 32 test coverage 
-  -[clean](clean) - Running 'make clean' will unmount your image and remove all executables
-  -[nufs](nufs) - Running 'make nufs' will compile all the nufs code and included files
-  -[mount](mount) - Running 'make mount' will run the fuse filesystem and is the main project driver
-    - This calls pairs with 'cd' into the mount and using our filesystem...
-  -[unmount](mount) - Running 'make unmount' will remove your mounted disk image 
+- Supported make commands:
+
+- [test](test) - Running 'make test' will run 32 test coverage 
+- [clean](clean) - Running 'make clean' will unmount your image and remove all executables
+- [nufs](nufs) - Running 'make nufs' will compile all the nufs code and included files
+- [mount](mount) - Running 'make mount' will run the fuse filesystem and is the main project driver
+  - This calls pairs with 'cd' into the mount and using our filesystem...
+- [unmount](mount) - Running 'make unmount' will remove your mounted disk image 
 
